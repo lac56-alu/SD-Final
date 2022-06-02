@@ -1,0 +1,309 @@
+{
+  "openapi" : "3.0.0",
+  "info" : {
+    "title" : "Simple Inventory API",
+    "description" : "This is a simple API",
+    "contact" : {
+      "email" : "lac56@gcloud.ua.es"
+    },
+    "license" : {
+      "name" : "Apache 2.0",
+      "url" : "http://www.apache.org/licenses/LICENSE-2.0.html"
+    },
+    "version" : "1.0.0"
+  },
+  "servers" : [ {
+    "url" : "https://virtserver.swaggerhub.com/lac56-alu/SD-REGISTRY/1.0.0",
+    "description" : "SwaggerHub API Auto Mocking"
+  } ],
+  "tags" : [ {
+    "name" : "registro",
+    "description" : "Para el apartado el apartado de registro"
+  } ],
+  "paths" : {
+    "/nuevoUsuario/{restKey}" : {
+      "post" : {
+        "tags" : [ "registro" ],
+        "summary" : "registro",
+        "description" : "Crear usuarios\n",
+        "operationId" : "nuevoUsuario",
+        "parameters" : [ {
+          "name" : "restKey",
+          "in" : "path",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "$ref" : "#/components/requestBodies/NuevoUsuario"
+        },
+        "responses" : {
+          "201" : {
+            "description" : "usuario creado correctamente"
+          },
+          "400" : {
+            "description" : "bad input parameter"
+          }
+        }
+      }
+    },
+    "/borrarUsuario/{restKey}/{nameUser}" : {
+      "delete" : {
+        "tags" : [ "registro" ],
+        "summary" : "registro",
+        "description" : "Borrar usuario\n",
+        "operationId" : "borrarUsuarios",
+        "parameters" : [ {
+          "name" : "restKey",
+          "in" : "path",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "nameUser",
+          "in" : "path",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "204" : {
+            "description" : "usuario borrado correctamente"
+          },
+          "404" : {
+            "description" : "usuario no encontrado"
+          }
+        }
+      }
+    },
+    "/modificarUsuario/{restKey}" : {
+      "put" : {
+        "tags" : [ "registro" ],
+        "summary" : "registro",
+        "description" : "Modificar usuario\n",
+        "operationId" : "modificarUsuario",
+        "parameters" : [ {
+          "name" : "restKey",
+          "in" : "path",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "$ref" : "#/components/requestBodies/ModificarUsuario"
+        },
+        "responses" : {
+          "201" : {
+            "description" : "usuario modificado correctamente"
+          },
+          "404" : {
+            "description" : "sala no encontrada"
+          }
+        }
+      }
+    },
+    "/consultarUsuario/{restKey}/{nameUser}" : {
+      "get" : {
+        "tags" : [ "registro" ],
+        "summary" : "registro",
+        "description" : "Consultar Usuario\n",
+        "operationId" : "consultarUsuario",
+        "parameters" : [ {
+          "name" : "restKey",
+          "in" : "path",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "nameUser",
+          "in" : "path",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "ok",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/inline_response_200"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "usuario no encontrado"
+          }
+        }
+      }
+    },
+    "/consultarTodosUsuarios/{restKey}" : {
+      "get" : {
+        "tags" : [ "registro" ],
+        "summary" : "registro",
+        "description" : "Consultar Todos los Usuarios\n",
+        "operationId" : "consultarTodosUsuarios",
+        "parameters" : [ {
+          "name" : "restKey",
+          "in" : "path",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "ok",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/inline_response_200_1"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "no hay usuarios"
+          }
+        }
+      }
+    }
+  },
+  "components" : {
+    "schemas" : {
+      "UserItem" : {
+        "required" : [ "name", "password" ],
+        "type" : "object",
+        "properties" : {
+          "name" : {
+            "type" : "string"
+          },
+          "password" : {
+            "type" : "string"
+          }
+        },
+        "example" : {
+          "password" : "password",
+          "name" : "name"
+        }
+      },
+      "UserItemMod" : {
+        "required" : [ "name", "newPassword", "oldPassword" ],
+        "type" : "object",
+        "properties" : {
+          "name" : {
+            "type" : "string"
+          },
+          "oldPassword" : {
+            "type" : "string"
+          },
+          "newPassword" : {
+            "type" : "string"
+          }
+        }
+      },
+      "inline_response_200" : {
+        "type" : "object",
+        "properties" : {
+          "correcto" : {
+            "type" : "boolean"
+          },
+          "cadena" : {
+            "type" : "string"
+          },
+          "usuario" : {
+            "$ref" : "#/components/schemas/UserItem"
+          }
+        },
+        "example" : {
+          "correcto" : true,
+          "cadena" : "cadena",
+          "usuario" : {
+            "password" : "password",
+            "name" : "name"
+          }
+        }
+      },
+      "inline_response_200_1" : {
+        "type" : "object",
+        "properties" : {
+          "correcto" : {
+            "type" : "boolean"
+          },
+          "cadena" : {
+            "type" : "string"
+          }
+        },
+        "example" : {
+          "correcto" : true,
+          "cadena" : "cadena"
+        }
+      }
+    },
+    "responses" : {
+      "ConsultarUsuario" : {
+        "description" : "ok",
+        "content" : {
+          "application/json" : {
+            "schema" : {
+              "$ref" : "#/components/schemas/inline_response_200"
+            }
+          }
+        }
+      },
+      "ConsultarTodosUsuarios" : {
+        "description" : "ok",
+        "content" : {
+          "application/json" : {
+            "schema" : {
+              "$ref" : "#/components/schemas/inline_response_200_1"
+            }
+          }
+        }
+      }
+    },
+    "requestBodies" : {
+      "NuevoUsuario" : {
+        "description" : "Nuevo Usuario",
+        "content" : {
+          "application/json" : {
+            "schema" : {
+              "$ref" : "#/components/schemas/UserItem"
+            }
+          }
+        }
+      },
+      "ModificarUsuario" : {
+        "description" : "Modificar Usuario",
+        "content" : {
+          "application/json" : {
+            "schema" : {
+              "$ref" : "#/components/schemas/UserItemMod"
+            }
+          }
+        }
+      }
+    }
+  }
+}
