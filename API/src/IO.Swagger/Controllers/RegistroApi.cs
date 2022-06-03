@@ -326,7 +326,7 @@ namespace IO.Swagger.Controllers
                 cmd3.ExecuteNonQuery();
 
                 resp.Correcto = true;
-                resp.Cadena = "Correcto, token: " + token;
+                resp.Cadena = token;
                 conn.Close();
 
 
