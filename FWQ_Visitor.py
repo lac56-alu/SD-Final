@@ -1,7 +1,9 @@
 # ---------------------- IMPORTS ----------------------
+import json
 import socket
 from time import sleep
 import sys
+import requests
 
 # ---------------------- Variables Globales ----------------------
 HEADER = 64
@@ -17,7 +19,7 @@ serverAPI = "/lac56-alu/SD-REGISTRY/1.0.0/"
 
 currentUser = []
 
-# ---------------------- Modulos ----------------------
+# ---------------------- Modulos SOCKETS ----------------------
 def enviarMensaje(msg):
     nuevoMSG = msg.encode(FORMATO_MSG)
     msg_length = len(nuevoMSG)
@@ -37,7 +39,6 @@ def menuInicio():
     if int(seleccion) == 1:
         return seleccion
     elif int(seleccion) == 2:
-        print("API REST, proximamente.....")
         return seleccion
     else:
         print("Introduce una de las dos opciones")
@@ -152,6 +153,111 @@ def menuSockets():
         print("Introduce una opcion valida")
         menuSockets()
 
+# ---------------------- Modulos API ----------------------
+
+def menuRegistradoAPI():
+    print("Elige una de las opciones:")
+    print(" 1. Ir al Mapa")
+    print(" 2. Editar Perfil")
+    print(" 3. Borrar Perfil")
+    print(" 0. Salir")
+    seleccion = input()
+
+    if int(seleccion) == 1:
+        print("Mostrando Mapa")
+
+
+def crearUsuarioAPI():
+    msg = ""
+
+    print(" Nombre Usuario: ")
+    userName = input()
+    print(" Constraseña: ")
+    password = input()
+
+    try:
+        endPoint = "http://" + str(ipAPI) + ":" + str(puertoAPI) + serverAPI + "nuevoUsuario"
+        body = {"name": userName, "password": password}
+        jsonBody = json.dumps(body)
+
+        response = requests.post(
+            endPoint,
+            jsonBody,
+            headers={'Content-Type': 'application/json'}
+        )
+
+        jsonRespuesta = json.loads(response.text)
+
+        if response.status_code == 201:
+            print("Usuario creado correctamente.")
+            msg = jsonRespuesta['cadena']
+            print("Su token es: " + msg)
+        else:
+            msg = "Valores no validos."
+    except Exception:
+        msg = "No se ha podido conectar con el endpoint."
+
+    return msg
+
+
+
+def logInAPI():
+    msg = ""
+
+    print(" Nombre Usuario: ")
+    userName = input()
+    print(" Constraseña: ")
+    password = input()
+
+    try:
+        endPoint = "http://" + str(ipAPI) + ":" + str(puertoAPI) + serverAPI + "login"
+        body = {"name": userName, "password": password}
+        jsonBody = json.dumps(body)
+
+        response = requests.post(
+            endPoint,
+            jsonBody,
+            headers={'Content-Type': 'application/json'}
+        )
+        if response.status_code == 201:
+            msg = "Usuario logeado correctamente."
+        else:
+            msg = "Credenciales Incorrectas"
+    except Exception:
+        msg = "No se ha podido conectar con el endpoint."
+
+    return msg
+
+def menuAPI():
+    print("1. LogIn")
+    print("2. Crear Usuario")
+    print("0. SALIR")
+    seleccion = input()
+
+    if int(seleccion) == 1:
+        respuestaLogin = logInAPI()
+        print(respuestaLogin)
+
+        if respuestaLogin == "Usuario logeado correctamente.":
+            menuRegistradoAPI()
+        elif respuestaLogin == "No se ha podido conectar con el endpoint.":
+            menuInicio()
+        elif respuestaLogin == "Credenciales Incorrectas":
+            menuAPI()
+
+    elif int(seleccion) == 2:
+        respuestaCrear = crearUsuarioAPI()
+
+        if respuestaCrear == "Valores no validos." or respuestaCrear == "No se ha podido conectar con el endpoint.":
+            menuAPI()
+        else:
+            currentUser.append(respuestaCrear)
+    elif int(seleccion) == 0:
+        print("  Saliendo de la aplicacion...")
+        return
+    else:
+        print("Introduce una opcion valida")
+        menuAPI()
 
 
 
@@ -187,4 +293,4 @@ if int(eleccion) == 1:
             sleep(5)
 else:
     currentUser = []
-    print("API REST, proximamente.....")
+    menuAPI()
