@@ -1,7 +1,7 @@
 /*
- * Simple Inventory API
+ * API SD
  *
- * This is a simple API
+ * API SD
  *
  * OpenAPI spec version: 1.0.0
  * Contact: lac56@gcloud.ua.es
@@ -41,13 +41,6 @@ namespace IO.Swagger.Models
         public string Cadena { get; set; }
 
         /// <summary>
-        /// Gets or Sets Usuario
-        /// </summary>
-
-        [DataMember(Name="usuario")]
-        public UserItem Usuario { get; set; }
-
-        /// <summary>
         /// Returns the string presentation of the object
         /// </summary>
         /// <returns>String presentation of the object</returns>
@@ -57,7 +50,6 @@ namespace IO.Swagger.Models
             sb.Append("class InlineResponse200 {\n");
             sb.Append("  Correcto: ").Append(Correcto).Append("\n");
             sb.Append("  Cadena: ").Append(Cadena).Append("\n");
-            sb.Append("  Usuario: ").Append(Usuario).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -103,11 +95,6 @@ namespace IO.Swagger.Models
                     Cadena == other.Cadena ||
                     Cadena != null &&
                     Cadena.Equals(other.Cadena)
-                ) && 
-                (
-                    Usuario == other.Usuario ||
-                    Usuario != null &&
-                    Usuario.Equals(other.Usuario)
                 );
         }
 
@@ -125,8 +112,6 @@ namespace IO.Swagger.Models
                     hashCode = hashCode * 59 + Correcto.GetHashCode();
                     if (Cadena != null)
                     hashCode = hashCode * 59 + Cadena.GetHashCode();
-                    if (Usuario != null)
-                    hashCode = hashCode * 59 + Usuario.GetHashCode();
                 return hashCode;
             }
         }

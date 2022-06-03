@@ -1,7 +1,7 @@
 /*
- * Simple Inventory API
+ * API SD
  *
- * This is a simple API
+ * API SD
  *
  * OpenAPI spec version: 1.0.0
  * Contact: lac56@gcloud.ua.es
@@ -73,8 +73,8 @@ namespace IO.Swagger
                     c.SwaggerDoc("1.0.0", new OpenApiInfo
                     {
                         Version = "1.0.0",
-                        Title = "Simple Inventory API",
-                        Description = "Simple Inventory API (ASP.NET Core 3.1)",
+                        Title = "API SD",
+                        Description = "API SD (ASP.NET Core 3.1)",
                         Contact = new OpenApiContact()
                         {
                            Name = "Swagger Codegen Contributors",
@@ -113,10 +113,10 @@ namespace IO.Swagger
             app.UseSwaggerUI(c =>
             {
                 //TODO: Either use the SwaggerGen generated Swagger contract (generated from C# classes)
-                c.SwaggerEndpoint("/swagger/1.0.0/swagger.json", "Simple Inventory API");
+                c.SwaggerEndpoint("/swagger/1.0.0/swagger.json", "API SD");
 
                 //TODO: Or alternatively use the original Swagger contract that's included in the static files
-                // c.SwaggerEndpoint("/swagger-original.json", "Simple Inventory API Original");
+                // c.SwaggerEndpoint("/swagger-original.json", "API SD Original");
             });
 
             //TODO: Use Https Redirection

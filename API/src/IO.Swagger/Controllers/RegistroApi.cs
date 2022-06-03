@@ -1,7 +1,7 @@
 /*
- * Simple Inventory API
+ * API SD
  *
- * This is a simple API
+ * API SD
  *
  * OpenAPI spec version: 1.0.0
  * Contact: lac56@gcloud.ua.es
@@ -29,6 +29,27 @@ namespace IO.Swagger.Controllers
     public class RegistroApiController : ControllerBase
     {
         private MySqlConnection conn;
+
+        private string generarToken()
+        {
+            string cadena = "";
+
+            char[] muestra = { 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r',
+                's', 't', 'u', 'v', 'w', 'x', 'y', 'z', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M',
+                'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', '1', '2', '3', '4', '5', '6', '7', '8', '9', '0' };
+            Random random = new Random();
+            int randomNumber1 = random.Next(0, 300);
+
+
+            for (int x = 0; x < 43; x++)
+            {
+                int indiceAleatorio = random.Next(0, muestra.Length);
+                cadena = cadena + muestra[indiceAleatorio];
+            }
+
+            return cadena;
+        }
+
         /// <summary>
         /// registro
         /// </summary>
@@ -42,14 +63,71 @@ namespace IO.Swagger.Controllers
         [ValidateModelState]
         [SwaggerOperation("BorrarUsuarios")]
         public virtual IActionResult BorrarUsuarios([FromRoute][Required]string restKey, [FromRoute][Required]string nameUser)
-        { 
-            //TODO: Uncomment the next line to return response 204 or use other options such as return this.NotFound(), return this.BadRequest(..), ...
-            // return StatusCode(204);
+        {
+            string stringConexion = "server=localhost;port=3306;user id=luis;password=root;database=sd;SslMode=none";
+            conn = new MySqlConnection(stringConexion);
+            conn.Open();
+            MySqlCommand cmd = new MySqlCommand();
+            cmd.Connection = conn;
+            InlineResponse200 resp = new InlineResponse200();
 
-            //TODO: Uncomment the next line to return response 404 or use other options such as return this.NotFound(), return this.BadRequest(..), ...
-            // return StatusCode(404);
+            cmd.CommandText = "SELECT * FROM sd.claves where name = '" + nameUser + "'";
+            cmd.ExecuteNonQuery();
+            MySqlDataReader readerKey = cmd.ExecuteReader();
+            bool comprobarKey = false;
 
-            throw new NotImplementedException();
+            while (readerKey.Read())
+            {
+                if (restKey == readerKey.GetString(1))
+                {
+                    comprobarKey = true;
+                    break;
+                }
+
+            }
+
+            if (comprobarKey)
+            {
+                try
+                {
+                    conn = new MySqlConnection(stringConexion);
+                    conn.Open();
+                    MySqlCommand cmd2 = new MySqlCommand();
+                    cmd2.Connection = conn;
+                    string sql = "DELETE FROM sd.usuarios where nombre='" + nameUser + "'";
+                    cmd2.CommandText = sql;
+                    cmd2.ExecuteNonQuery();
+                    conn.Close();
+
+                    conn.Open();
+                    MySqlCommand cmd3 = new MySqlCommand();
+                    cmd3.Connection = conn;
+                    string token = generarToken();
+                    cmd3.CommandText = "DELETE FROM sd.claves WHERE name='" + nameUser + "'";
+                    cmd3.ExecuteNonQuery();
+
+                    resp.Correcto = true;
+                    resp.Cadena = "Usuario borrado correctamente";
+                    conn.Close();
+
+                }
+                catch (MySqlException e)
+                {
+                    resp.Correcto = false;
+                    resp.Cadena = "Error al realizar el modificar";
+                    conn.Close();
+                    return StatusCode(500, resp);
+                }
+            }
+            else
+            {
+                resp.Correcto = false;
+                resp.Cadena = "Error en la restKey";
+                conn.Close();
+                return StatusCode(404, resp);
+            }
+
+            return StatusCode(201, resp);
         }
 
         /// <summary>
@@ -63,37 +141,8 @@ namespace IO.Swagger.Controllers
         [Route("/lac56-alu/SD-REGISTRY/1.0.0/consultarTodosUsuarios/{restKey}")]
         [ValidateModelState]
         [SwaggerOperation("ConsultarTodosUsuarios")]
-        [SwaggerResponse(statusCode: 200, type: typeof(InlineResponse2001), description: "ok")]
-        public virtual IActionResult ConsultarTodosUsuarios([FromRoute][Required]string restKey)
-        { 
-            //TODO: Uncomment the next line to return response 200 or use other options such as return this.NotFound(), return this.BadRequest(..), ...
-            // return StatusCode(200, default(InlineResponse2001));
-
-            //TODO: Uncomment the next line to return response 404 or use other options such as return this.NotFound(), return this.BadRequest(..), ...
-            // return StatusCode(404);
-            string exampleJson = null;
-            exampleJson = "{\n  \"correcto\" : true,\n  \"cadena\" : \"cadena\"\n}";
-            
-                        var example = exampleJson != null
-                        ? JsonConvert.DeserializeObject<InlineResponse2001>(exampleJson)
-                        : default(InlineResponse2001);            //TODO: Change the data returned
-            return new ObjectResult(example);
-        }
-
-        /// <summary>
-        /// registro
-        /// </summary>
-        /// <remarks>Consultar Usuario </remarks>
-        /// <param name="restKey"></param>
-        /// <param name="nameUser"></param>
-        /// <response code="200">ok</response>
-        /// <response code="404">usuario no encontrado</response>
-        [HttpGet]
-        [Route("/lac56-alu/SD-REGISTRY/1.0.0/consultarUsuario/{restKey}/{nameUser}")]
-        [ValidateModelState]
-        [SwaggerOperation("ConsultarUsuario")]
         [SwaggerResponse(statusCode: 200, type: typeof(InlineResponse200), description: "ok")]
-        public virtual IActionResult ConsultarUsuario([FromRoute][Required]string restKey, [FromRoute][Required]string nameUser)
+        public virtual IActionResult ConsultarTodosUsuarios([FromRoute][Required]string restKey)
         { 
             //TODO: Uncomment the next line to return response 200 or use other options such as return this.NotFound(), return this.BadRequest(..), ...
             // return StatusCode(200, default(InlineResponse200));
@@ -101,12 +150,75 @@ namespace IO.Swagger.Controllers
             //TODO: Uncomment the next line to return response 404 or use other options such as return this.NotFound(), return this.BadRequest(..), ...
             // return StatusCode(404);
             string exampleJson = null;
-            exampleJson = "{\n  \"correcto\" : true,\n  \"cadena\" : \"cadena\",\n  \"usuario\" : {\n    \"password\" : \"password\",\n    \"name\" : \"name\"\n  }\n}";
+            exampleJson = "{\n  \"correcto\" : true,\n  \"cadena\" : \"cadena\"\n}";
             
                         var example = exampleJson != null
                         ? JsonConvert.DeserializeObject<InlineResponse200>(exampleJson)
                         : default(InlineResponse200);            //TODO: Change the data returned
             return new ObjectResult(example);
+        }
+
+        /// <summary>
+        /// registro
+        /// </summary>
+        /// <remarks>LogIn Usuario </remarks>
+        /// <param name="body">Nuevo Usuario</param>
+        /// <response code="200">usuario creado correctamente</response>
+        /// <response code="404">error al hacer login</response>
+        [HttpPost]
+        [Route("/lac56-alu/SD-REGISTRY/1.0.0/login")]
+        [ValidateModelState]
+        [SwaggerOperation("Login")]
+        public virtual IActionResult Login([FromBody]UserItem body)
+        {
+            string stringConexion = "server=localhost;port=3306;user id=luis;password=root;database=sd;SslMode=none";
+            InlineResponse200 resp = new InlineResponse200();
+            try
+            {
+                conn = new MySqlConnection(stringConexion);
+                conn.Open();
+                MySqlCommand cmd2 = new MySqlCommand();
+                cmd2.Connection = conn;
+                cmd2.CommandText = "SELECT * FROM sd.usuarios WHERE nombre='" + body.Name.ToString() + "' and password='" + body.Password.ToString() + "'";
+                cmd2.ExecuteNonQuery();
+
+                MySqlDataReader readerKey = cmd2.ExecuteReader();
+                bool comprobar = false;
+
+                while (readerKey.Read())
+                {
+                    if (body.Name.ToString() == readerKey.GetString(1) && body.Password.ToString() == readerKey.GetString(2))
+                    {
+                        comprobar = true;
+                        break;
+                    }
+
+                }
+                
+                if (comprobar)
+                {
+                    resp.Correcto = true;
+                    resp.Cadena = "Usuario logeado correctamente";
+                    
+                }
+                else
+                {
+                    resp.Correcto = false;
+                    resp.Cadena = "Credenciales Incorrectas";
+                    return StatusCode(404, resp);
+                }
+
+                conn.Close();
+            }
+            catch (MySqlException e)
+            {
+                resp.Correcto = false;
+                resp.Cadena = "Error al realizar el crear";
+                conn.Close();
+                return StatusCode(500, resp);
+            }
+
+            return StatusCode(201, resp);
         }
 
         /// <summary>
@@ -122,32 +234,80 @@ namespace IO.Swagger.Controllers
         [ValidateModelState]
         [SwaggerOperation("ModificarUsuario")]
         public virtual IActionResult ModificarUsuario([FromRoute][Required]string restKey, [FromBody]UserItemMod body)
-        { 
-            //TODO: Uncomment the next line to return response 201 or use other options such as return this.NotFound(), return this.BadRequest(..), ...
-            // return StatusCode(201);
+        {
+            string stringConexion = "server=localhost;port=3306;user id=luis;password=root;database=sd;SslMode=none";
+            conn = new MySqlConnection(stringConexion);
+            conn.Open();
+            MySqlCommand cmd = new MySqlCommand();
+            cmd.Connection = conn;
+            InlineResponse200 resp = new InlineResponse200();
 
-            //TODO: Uncomment the next line to return response 404 or use other options such as return this.NotFound(), return this.BadRequest(..), ...
-            // return StatusCode(404);
+            cmd.CommandText = "SELECT * FROM sd.claves where name = '" + body.Name + "'";
+            cmd.ExecuteNonQuery();
+            MySqlDataReader readerKey = cmd.ExecuteReader();
+            bool comprobarKey = false;
 
-            throw new NotImplementedException();
+            while (readerKey.Read())
+            {
+                if (restKey == readerKey.GetString(1))
+                {
+                    comprobarKey = true;
+                    break;
+                }
+
+            }
+
+            if (comprobarKey)
+            {
+                try
+                {
+                    conn = new MySqlConnection(stringConexion);
+                    conn.Open();
+                    MySqlCommand cmd2 = new MySqlCommand();
+                    cmd2.Connection = conn;
+                    string sql = "UPDATE sd.usuarios SET password='" + body.NewPassword.ToString() + "' where nombre='" + body.Name.ToString() + "' and password='" + body.OldPassword.ToString() + "'";
+                    cmd2.CommandText = sql;
+                    cmd2.ExecuteNonQuery();
+
+                    resp.Correcto = true;
+                    resp.Cadena = "Se ha modificado el usuario";
+                    conn.Close();
+
+                }
+                catch (MySqlException e)
+                {
+                    resp.Correcto = false;
+                    resp.Cadena = "Error al realizar el modificar";
+                    conn.Close();
+                    return StatusCode(500, resp);
+                }
+            }
+            else
+            {
+                resp.Correcto = false;
+                resp.Cadena = "Error en la restKey";
+                conn.Close();
+                return StatusCode(404, resp);
+            }
+
+            return StatusCode(201, resp);
         }
 
         /// <summary>
         /// registro
         /// </summary>
         /// <remarks>Crear usuarios </remarks>
-        /// <param name="restKey"></param>
         /// <param name="body">Nuevo Usuario</param>
         /// <response code="201">usuario creado correctamente</response>
         /// <response code="400">bad input parameter</response>
         [HttpPost]
-        [Route("/lac56-alu/SD-REGISTRY/1.0.0/nuevoUsuario/{restKey}")]
+        [Route("/lac56-alu/SD-REGISTRY/1.0.0/nuevoUsuario")]
         [ValidateModelState]
         [SwaggerOperation("NuevoUsuario")]
-        public virtual IActionResult NuevoUsuario([FromRoute][Required]string restKey, [FromBody]UserItem body)
+        public virtual IActionResult NuevoUsuario([FromBody]UserItem body)
         {
             string stringConexion = "server=localhost;port=3306;user id=luis;password=root;database=sd;SslMode=none";
-            InlineResponse2001 resp = new InlineResponse2001();
+            InlineResponse200 resp = new InlineResponse200();
             try
             {
                 conn = new MySqlConnection(stringConexion);
@@ -156,10 +316,20 @@ namespace IO.Swagger.Controllers
                 cmd2.Connection = conn;
                 cmd2.CommandText = "INSERT INTO sd.usuarios (nombre, password) VALUES ('" + body.Name.ToString() + "', '" + body.Password.ToString() + "')";
                 cmd2.ExecuteNonQuery();
+                conn.Close();
+
+                conn.Open();
+                MySqlCommand cmd3 = new MySqlCommand();
+                cmd3.Connection = conn;
+                string token = generarToken();
+                cmd3.CommandText = "INSERT INTO sd.claves (name, clave) VALUES ('" + body.Name.ToString() + "', '" + token + "')";
+                cmd3.ExecuteNonQuery();
 
                 resp.Correcto = true;
-                resp.Cadena = "Se ha creado el usuario";
+                resp.Cadena = "Correcto, token: " + token;
                 conn.Close();
+
+
             }
             catch (MySqlException e)
             {

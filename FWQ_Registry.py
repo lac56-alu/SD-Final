@@ -2,6 +2,7 @@
 import sys
 import socket
 import threading
+import os, binascii
 
 import mysql.connector
 import re
@@ -19,10 +20,12 @@ mensajeMaxConex = "Se ha superado el número de conexiones permitidas... (max = 
 class User:
     nombre = ""
     password = ""
+    token = ""
 
-    def __init__(self, n, p):
+    def __init__(self, n, p, t):
         self.nombre = n
         self.password = p
+        self.token = t
 
 
 UsuariosCreados: User = []
@@ -46,9 +49,25 @@ def crearUsuario(msg):
         cnx.commit()
         cnx.close()
 
-        usuario = User(partes[1], partes[2])
+        token = str(binascii.b2a_hex(os.urandom(20)))
+
+        cnx2 = mysql.connector.connect(
+            user='luis',
+            password='root',
+            host='127.0.0.1',
+            database='sd'
+        )
+        executeQuery2 = cnx2.cursor()
+        sql2 = "insert into claves (name, clave) values(%s, %s)"
+        val2 = (partes[1], token)
+        executeQuery2.execute(sql2, val2)
+
+        cnx2.commit()
+        cnx2.close()
+
+        usuario = User(partes[1], partes[2], token)
         UsuariosCreados.append(usuario)
-        return ("Usuario creado correctamente")
+        return ("Correcto, token:" + token)
 
     except Exception as e:
         return ("Se ha producido un error al crear el usuario...")
@@ -88,6 +107,21 @@ def deleteUsuarios(msg):
 
         cnx.commit()
         cnx.close()
+
+        cnx2 = mysql.connector.connect(
+            user='luis',
+            password='root',
+            host='127.0.0.1',
+            database='sd'
+        )
+        executeQuery2 = cnx2.cursor()
+        sql2 = "DELETE FROM claves WHERE name = '" + partes[1] + "'"
+        executeQuery2.execute(sql2)
+
+        cnx2.commit()
+        cnx2.close()
+
+
         return ("Usuario borrado correctamente.")
 
     except Exception as e:

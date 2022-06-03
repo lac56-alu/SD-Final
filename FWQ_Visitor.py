@@ -13,6 +13,7 @@ ipBroker = 0
 puertoBroker = 0
 ipAPI = 0
 puertoAPI = 0
+serverAPI = "/lac56-alu/SD-REGISTRY/1.0.0/"
 
 currentUser = []
 

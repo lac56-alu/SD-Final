@@ -1,7 +1,7 @@
 /*
- * Simple Inventory API
+ * API SD
  *
- * This is a simple API
+ * API SD
  *
  * OpenAPI spec version: 1.0.0
  * Contact: lac56@gcloud.ua.es

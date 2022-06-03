@@ -1,8 +1,8 @@
 {
   "openapi" : "3.0.0",
   "info" : {
-    "title" : "Simple Inventory API",
-    "description" : "This is a simple API",
+    "title" : "API SD",
+    "description" : "API SD",
     "contact" : {
       "email" : "lac56@gcloud.ua.es"
     },
@@ -21,22 +21,12 @@
     "description" : "Para el apartado el apartado de registro"
   } ],
   "paths" : {
-    "/nuevoUsuario/{restKey}" : {
+    "/nuevoUsuario" : {
       "post" : {
         "tags" : [ "registro" ],
         "summary" : "registro",
         "description" : "Crear usuarios\n",
         "operationId" : "nuevoUsuario",
-        "parameters" : [ {
-          "name" : "restKey",
-          "in" : "path",
-          "required" : true,
-          "style" : "simple",
-          "explode" : false,
-          "schema" : {
-            "type" : "string"
-          }
-        } ],
         "requestBody" : {
           "$ref" : "#/components/requestBodies/NuevoUsuario"
         },
@@ -114,44 +104,21 @@
         }
       }
     },
-    "/consultarUsuario/{restKey}/{nameUser}" : {
-      "get" : {
+    "/login" : {
+      "post" : {
         "tags" : [ "registro" ],
         "summary" : "registro",
-        "description" : "Consultar Usuario\n",
-        "operationId" : "consultarUsuario",
-        "parameters" : [ {
-          "name" : "restKey",
-          "in" : "path",
-          "required" : true,
-          "style" : "simple",
-          "explode" : false,
-          "schema" : {
-            "type" : "string"
-          }
-        }, {
-          "name" : "nameUser",
-          "in" : "path",
-          "required" : true,
-          "style" : "simple",
-          "explode" : false,
-          "schema" : {
-            "type" : "string"
-          }
-        } ],
+        "description" : "LogIn Usuario\n",
+        "operationId" : "login",
+        "requestBody" : {
+          "$ref" : "#/components/requestBodies/NuevoUsuario"
+        },
         "responses" : {
           "200" : {
-            "description" : "ok",
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/inline_response_200"
-                }
-              }
-            }
+            "description" : "usuario creado correctamente"
           },
           "404" : {
-            "description" : "usuario no encontrado"
+            "description" : "error al hacer login"
           }
         }
       }
@@ -178,7 +145,7 @@
             "content" : {
               "application/json" : {
                 "schema" : {
-                  "$ref" : "#/components/schemas/inline_response_200_1"
+                  "$ref" : "#/components/schemas/inline_response_200"
                 }
               }
             }
@@ -202,10 +169,6 @@
           "password" : {
             "type" : "string"
           }
-        },
-        "example" : {
-          "password" : "password",
-          "name" : "name"
         }
       },
       "UserItemMod" : {
@@ -231,28 +194,6 @@
           },
           "cadena" : {
             "type" : "string"
-          },
-          "usuario" : {
-            "$ref" : "#/components/schemas/UserItem"
-          }
-        },
-        "example" : {
-          "correcto" : true,
-          "cadena" : "cadena",
-          "usuario" : {
-            "password" : "password",
-            "name" : "name"
-          }
-        }
-      },
-      "inline_response_200_1" : {
-        "type" : "object",
-        "properties" : {
-          "correcto" : {
-            "type" : "boolean"
-          },
-          "cadena" : {
-            "type" : "string"
           }
         },
         "example" : {
@@ -267,7 +208,18 @@
         "content" : {
           "application/json" : {
             "schema" : {
-              "$ref" : "#/components/schemas/inline_response_200"
+              "type" : "object",
+              "properties" : {
+                "correcto" : {
+                  "type" : "boolean"
+                },
+                "cadena" : {
+                  "type" : "string"
+                },
+                "usuario" : {
+                  "$ref" : "#/components/schemas/UserItem"
+                }
+              }
             }
           }
         }
@@ -277,7 +229,7 @@
         "content" : {
           "application/json" : {
             "schema" : {
-              "$ref" : "#/components/schemas/inline_response_200_1"
+              "$ref" : "#/components/schemas/inline_response_200"
             }
           }
         }
