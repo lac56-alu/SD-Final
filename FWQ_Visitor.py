@@ -19,6 +19,18 @@ serverAPI = "/lac56-alu/SD-REGISTRY/1.0.0/"
 
 currentUser = []
 
+def asignarNombrePass(u,p, currentUser):
+    currentUser.append(u)
+    currentUser.append(p)
+
+def asignarToken(t,currentUser):
+    currentUser.append(t)
+
+def asignarTODO(u,p,t, currentUser):
+    currentUser.append(u)
+    currentUser.append(p)
+    currentUser.append(t)
+
 # ---------------------- Modulos SOCKETS ----------------------
 def enviarMensaje(msg):
     nuevoMSG = msg.encode(FORMATO_MSG)
@@ -50,8 +62,8 @@ def logInSockets():
     print(" Constraseña: ")
     password = input()
 
-    currentUser.append(userName)
-    currentUser.append(password)
+    currentUser[0] = userName
+    currentUser[1] = password
 
     cadena = "logIn," + userName + "," + password
     return cadena
@@ -155,6 +167,44 @@ def menuSockets():
 
 # ---------------------- Modulos API ----------------------
 
+def modificarUsuarioAPI():
+    comprobarPass = False
+
+    print(" Introduzca la contraseña actual: ")
+    passOld = input()
+
+    while not comprobarPass:
+        print(" Constraseña nueva: ")
+        password = input()
+        print(" Repita la contraseña nueva: ")
+        password2 = input()
+
+        if password == password2:
+            comprobarPass = True
+
+    try:
+        endPoint = "http://" + str(ipAPI) + ":" + str(puertoAPI) + serverAPI + "modificarUsuario/" + currentUser[2]
+        body = {"name": currentUser[0], "oldPassword": passOld, "newPassword": password}
+        jsonBody = json.dumps(body)
+
+        response = requests.put(
+            endPoint,
+            jsonBody,
+            headers={'Content-Type': 'application/json'}
+        )
+        print(response.status_code)
+        jsonRespuesta = json.loads(response.text)
+
+        if response.status_code == 201:
+            msg = jsonRespuesta['cadena']
+            print("Usuario modificado correctamente.")
+        else:
+            msg = "Valores no validos."
+    except Exception:
+        msg = "No se ha podido conectar con el endpoint."
+
+    return msg
+
 def menuRegistradoAPI():
     print("Elige una de las opciones:")
     print(" 1. Ir al Mapa")
@@ -165,6 +215,15 @@ def menuRegistradoAPI():
 
     if int(seleccion) == 1:
         print("Mostrando Mapa")
+
+    elif int(seleccion) == 2:
+        modificarUsuarioAPI()
+        menuRegistradoAPI()
+
+    elif int(seleccion) == 3:
+        menuRegistradoAPI()
+    elif int(seleccion) == 0:
+        print("Saliendo de la aplicacion...")
 
 
 def crearUsuarioAPI():
@@ -219,7 +278,19 @@ def logInAPI():
             jsonBody,
             headers={'Content-Type': 'application/json'}
         )
+
+        jsonRespuesta = json.loads(response.text)
+
         if response.status_code == 201:
+            token = jsonRespuesta['cadena']
+            try:
+                asignarTODO(userName, password, token, currentUser)
+            except Exception as e:
+                print(e)
+
+            """currentUser.append(userName)
+            currentUser.append(password)
+            currentUser.append(token)"""
             msg = "Usuario logeado correctamente."
         else:
             msg = "Credenciales Incorrectas"
