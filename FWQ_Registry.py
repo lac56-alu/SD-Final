@@ -5,10 +5,9 @@ import threading
 import os, binascii
 
 import mysql.connector
-import re
 
 # ---------------------- Variables Globales ----------------------
-HEADER = 64
+HEADER = 100
 FORMATO_MSG = 'utf-8'
 
 puertoEscucha: int = 0
@@ -62,6 +61,37 @@ def obtenerToken(nombre):
         token = "error"
         return token
 
+def comprobarToken(nombre, token):
+    comprobar = False
+    try:
+        cnx = mysql.connector.connect(
+            user='luis',
+            password='root',
+            host='127.0.0.1',
+            database='sd'
+        )
+
+        executeQuery = cnx.cursor()
+        sql = "SELECT * FROM claves WHERE name = '" + nombre + "' and clave='" + token + "'"
+        executeQuery.execute(sql)
+
+        myresult = executeQuery.fetchone()
+        print(myresult)
+
+        if myresult == None:
+            cnx.commit()
+            cnx.close()
+        elif myresult[0] == nombre and myresult[1] == token:
+            print("TOKEN CORRECTO")
+            cnx.commit()
+            cnx.close()
+            comprobar = True
+    except Exception as e:
+        comprobar = False
+
+    return comprobar
+
+
 def crearUsuario(msg):
     try:
         cnx = mysql.connector.connect(
@@ -104,7 +134,8 @@ def crearUsuario(msg):
         return ("Se ha producido un error al crear el usuario...")
 
 
-def modificarUsuario(nombre, password):
+def modificarUsuario(msg):
+    print("Entra en MODIFICAR")
     try:
         cnx = mysql.connector.connect(
             user='luis',
@@ -112,13 +143,20 @@ def modificarUsuario(nombre, password):
             host='127.0.0.1',
             database='sd'
         )
+        partes = msg.split(',')
+        print(partes)
 
-        executeQuery = cnx.cursor()
-        sql = "UPDATE usuarios SET password = '" + password + "' WHERE nombre = '" + nombre + "'"
-        executeQuery.execute(sql)
+        if comprobarToken(partes[1], partes[3]):
 
-        cnx.commit()
-        cnx.close()
+            executeQuery = cnx.cursor()
+            sql = "UPDATE usuarios SET password = '" + partes[2] + "' WHERE nombre = '" + partes[1] + "'"
+            executeQuery.execute(sql)
+
+            cnx.commit()
+            cnx.close()
+            return("Se ha modificado el usuario correctamente.")
+        else:
+            return("Credenciales Incorrectas.")
 
     except Exception as e:
         return ("Se ha producido un error al modificar el usuario...")
@@ -132,27 +170,27 @@ def deleteUsuarios(msg):
             database='sd'
         )
         partes = msg.split(',')
-        executeQuery = cnx.cursor()
-        sql = "DELETE FROM usuarios WHERE password = '" + partes[2] + "' and nombre = '" + partes[1] + "'"
-        executeQuery.execute(sql)
 
-        cnx.commit()
-        cnx.close()
+        if comprobarToken(partes[1], partes[3]):
+            executeQuery = cnx.cursor()
+            sql = "DELETE FROM usuarios WHERE password = '" + partes[2] + "' and nombre = '" + partes[1] + "'"
+            executeQuery.execute(sql)
 
-        cnx2 = mysql.connector.connect(
-            user='luis',
-            password='root',
-            host='127.0.0.1',
-            database='sd'
-        )
-        executeQuery2 = cnx2.cursor()
-        sql2 = "DELETE FROM claves WHERE name = '" + partes[1] + "'"
-        executeQuery2.execute(sql2)
+            cnx.commit()
+            cnx.close()
 
-        cnx2.commit()
-        cnx2.close()
+            cnx2 = mysql.connector.connect(
+                user='luis',
+                password='root',
+                host='127.0.0.1',
+                database='sd'
+            )
+            executeQuery2 = cnx2.cursor()
+            sql2 = "DELETE FROM claves WHERE name = '" + partes[1] + "'"
+            executeQuery2.execute(sql2)
 
-
+            cnx2.commit()
+            cnx2.close()
         return ("Usuario borrado correctamente.")
 
     except Exception as e:
@@ -180,7 +218,6 @@ def logIn(msg):
         elif myresult[1] == partes[1] and myresult[2] == partes[2]:
             cnx.commit()
             cnx.close()
-            print(obtenerToken(partes[1]))
             return obtenerToken(partes[1])
     except Exception as e:
         return ("Error")
@@ -191,11 +228,14 @@ def threadsHandler(connHandler, addrHandler):
 
     while comprobarBucle:
         try:
+            print("hola 1")
             msg_length = connHandler.recv(HEADER).decode(FORMATO_MSG)
             if msg_length:
+                print("hola 2")
                 msg_length = int(msg_length)
                 msg = connHandler.recv(msg_length).decode(FORMATO_MSG)
 
+                print(msg)
                 if msg == "LOGOUT":
                     connHandler.send("La sesión se cerró correctamente.")
                     comprobarBucle = False
@@ -203,22 +243,19 @@ def threadsHandler(connHandler, addrHandler):
                 elif "deleteUsuario" in msg:
                     deleteUsuarios(str(msg))
                     connHandler.send("Sesión cerrada y usuario eliminado.")
-                    comprobarBucle = False
 
                 elif "crearUsuario" in msg:
                     result = crearUsuario(str(msg))
                     connHandler.send(result.encode(FORMATO_MSG))
-                    comprobarBucle = False
 
-                elif "modificarUsuario" in msg:
+                elif "modificar" in msg:
+                    print("Entra en el IF")
                     result = modificarUsuario(str(msg))
                     connHandler.send(result.encode(FORMATO_MSG))
-                    comprobarBucle = False
 
                 elif "logIn" in msg:
                     result = logIn(str(msg))
                     connHandler.send(result.encode(FORMATO_MSG))
-                    comprobarBucle = False
         except Exception as e:
             return ("Error en el Handler...")
 

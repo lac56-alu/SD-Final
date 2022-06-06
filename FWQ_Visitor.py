@@ -6,7 +6,7 @@ import sys
 import requests
 
 # ---------------------- Variables Globales ----------------------
-HEADER = 64
+HEADER = 100
 FORMATO_MSG = 'utf-8'
 
 ipRegistry = 0
@@ -95,17 +95,22 @@ def modificarUsuario():
     print(" Introduzca la contraseña actual: ")
     passOld = input()
 
-    while not comprobarPass:
-        print(" Constraseña nueva: ")
-        password = input()
-        print(" Repita la contraseña nueva: ")
-        password2 = input()
+    if passOld == currentUser[1]:
+        while not comprobarPass:
+            print(" Constraseña nueva: ")
+            password = input()
+            print(" Repita la contraseña nueva: ")
+            password2 = input()
 
-        if password == password2:
-            comprobarPass = True
+            if password == password2:
+                comprobarPass = True
 
-    cadena = "modificarUsuario," + currentUser[0] + "," + passOld + "," + password
-    return cadena
+        cadena = "modificar," + currentUser[0] + "," + password + "," + currentUser[2]
+        return cadena
+    else:
+        cadena = ""
+        print("Credenciales incorrectas")
+        return cadena
 
 
 def menuRegistradoSockets():
@@ -119,18 +124,35 @@ def menuRegistradoSockets():
     if int(seleccion) == 1:
         print("Mostrando Mapa")
 
-
-
     elif int(seleccion) == 2:
         datosModificarUsuario = modificarUsuario()
+
+        if datosModificarUsuario == "":
+            menuRegistradoSockets()
+
         enviarMensaje(datosModificarUsuario)
         msg = cliente.recv(HEADER).decode(FORMATO_MSG)
         print(msg)
+        menuRegistradoSockets()
+
     elif int(seleccion) == 3:
-        cadenaBorrar = "deleteUsuario," + currentUser[0] + "," + currentUser[1]
-        enviarMensaje(cadenaBorrar)
-        msg = cliente.recv(HEADER).decode(FORMATO_MSG)
-        print(msg)
+        print("¿Seguro que quiere borrar su usuario? y/n")
+        seleccion = input()
+
+        if seleccion == "y":
+            print(" Introduzca la contraseña actual: ")
+            password = input()
+
+            if password == currentUser[1]:
+                cadenaBorrar = "deleteUsuario," + currentUser[0] + "," + currentUser[1] + "," + currentUser[2]
+                enviarMensaje(cadenaBorrar)
+                msg = cliente.recv(HEADER).decode(FORMATO_MSG)
+                print(msg)
+            else:
+                print("Credenciales Incorrectas.")
+                menuRegistradoSockets()
+        else:
+            menuRegistradoSockets()
     elif int(seleccion) == 0:
         print(" Saliendo de la aplicacion...")
     else:
