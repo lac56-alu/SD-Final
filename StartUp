@@ -1,0 +1,9 @@
+EJECUCIÓN SD
+
+- FWQ_Visitor:
+cd  C:\Users\luis2\Desktop\2021 - 2022\Primer Cuatri\SD\Practicas\Practica Final
+py ./FWQ_Visitor.py 192.168.56.1 5432 1 1 localhost 50352
+
+ - FWQ_Registry:
+cd C:\Users\luis2\Desktop\2021 - 2022\Primer Cuatri\SD\Practicas\Practica Final
+py ./FWQ_Registry.py 5432

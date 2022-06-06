@@ -197,8 +197,42 @@ namespace IO.Swagger.Controllers
                 
                 if (comprobar)
                 {
-                    resp.Correcto = true;
-                    resp.Cadena = "Usuario logeado correctamente";
+                    conn.Close();
+                    try
+                    {
+                        conn = new MySqlConnection(stringConexion);
+                        conn.Open();
+                        MySqlCommand cmd3 = new MySqlCommand();
+                        cmd3.Connection = conn;
+                        string sql = "SELECT * FROM sd.claves WHERE name='" + body.Name.ToString() + "'";
+                        cmd3.CommandText = sql;
+                        cmd3.ExecuteNonQuery();
+
+                        MySqlDataReader readerKey2 = cmd3.ExecuteReader();
+                        string token = "";
+
+                        while (readerKey2.Read())
+                        {
+                            if (body.Name.ToString() == readerKey2.GetString(0))
+                            {
+                                token = readerKey2.GetString(1);
+                                break;
+                            }
+
+                        }
+
+                        resp.Correcto = true;
+                        resp.Cadena = token;
+                        conn.Close();
+
+                    }
+                    catch (MySqlException e)
+                    {
+                        resp.Correcto = false;
+                        resp.Cadena = "Error al encontrar token";
+                        conn.Close();
+                        return StatusCode(500, resp);
+                    }
                     
                 }
                 else

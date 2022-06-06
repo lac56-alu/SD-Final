@@ -31,6 +31,37 @@ class User:
 UsuariosCreados: User = []
 
 # ---------------------- Modulos ----------------------
+
+def obtenerToken(nombre):
+    token = ""
+    try:
+        cnx = mysql.connector.connect(
+            user='luis',
+            password='root',
+            host='127.0.0.1',
+            database='sd'
+        )
+
+        executeQuery = cnx.cursor()
+        sql = "SELECT * FROM claves WHERE name = '" + nombre + "'"
+        executeQuery.execute(sql)
+
+        myresult = executeQuery.fetchone()
+
+        if myresult == None:
+            cnx.commit()
+            cnx.close()
+            token = "no existe"
+            return token
+        elif myresult[0] == nombre:
+            token = myresult[1]
+            cnx.commit()
+            cnx.close()
+            return token
+    except Exception as e:
+        token = "error"
+        return token
+
 def crearUsuario(msg):
     try:
         cnx = mysql.connector.connect(
@@ -145,13 +176,14 @@ def logIn(msg):
         if myresult == None:
             cnx.commit()
             cnx.close()
-            return ("No se ha encontrado ese usuario/password.")
+            return ("No encontrado")
         elif myresult[1] == partes[1] and myresult[2] == partes[2]:
             cnx.commit()
             cnx.close()
-            return ("LogIn correcto.")
+            print(obtenerToken(partes[1]))
+            return obtenerToken(partes[1])
     except Exception as e:
-        return ("Se ha producido un error al hacer logIn...")
+        return ("Error")
 
 def threadsHandler(connHandler, addrHandler):
     comprobarBucle: bool = True

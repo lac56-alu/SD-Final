@@ -31,6 +31,9 @@ def asignarTODO(u,p,t, currentUser):
     currentUser.append(p)
     currentUser.append(t)
 
+def borrarCurrent(currentUser):
+    currentUser = []
+
 # ---------------------- Modulos SOCKETS ----------------------
 def enviarMensaje(msg):
     nuevoMSG = msg.encode(FORMATO_MSG)
@@ -62,8 +65,7 @@ def logInSockets():
     print(" Constraseña: ")
     password = input()
 
-    currentUser[0] = userName
-    currentUser[1] = password
+    asignarNombrePass(userName, password, currentUser)
 
     cadena = "logIn," + userName + "," + password
     return cadena
@@ -147,11 +149,15 @@ def menuSockets():
         enviarMensaje(datosLogIn)
         msg = cliente.recv(HEADER).decode(FORMATO_MSG)
 
-        if msg == "LogIn correcto.":
-            print(msg)
-            menuRegistradoSockets()
+        if msg == "No encontrado":
+            print("Credenciales Incorrectas")
+            menuSockets()
+        elif msg == "Error":
+            print("Error al realizar la operacion...")
         else:
-            print(msg)
+            print("Acceso Correcto")
+            asignarToken(msg, currentUser)
+            menuRegistradoSockets()
     elif int(seleccion) == 2:
         datosCrearUsuario = crearUsuarioSockets()
         enviarMensaje(datosCrearUsuario)
@@ -205,6 +211,43 @@ def modificarUsuarioAPI():
 
     return msg
 
+def borrarUsuarioAPI():
+    msg = ""
+    print("¿Seguro que quiere borrar su usuario? y/n")
+    seleccion = input()
+
+    if seleccion == "y":
+        print(" Introduzca la contraseña actual: ")
+        password = input()
+
+        if password == currentUser[1]:
+            print("las contraseñas coinciden")
+            endPoint = "http://" + str(ipAPI) + ":" + str(puertoAPI) + serverAPI \
+                       + "borrarUsuario/" + currentUser[2] + "/" + currentUser[0]
+            response = requests.delete(
+                endPoint,
+                headers={'Content-Type': 'application/json'}
+            )
+
+            jsonRespuesta = json.loads(response.text)
+
+            if response.status_code == 201:
+                print(jsonRespuesta['cadena'])
+                msg = jsonRespuesta['cadena']
+            else:
+                print(jsonRespuesta['cadena'])
+                msg = "No se ha podido borrar el usuario."
+        else:
+            print("Credendiales incorrectas.")
+
+
+    elif seleccion == "n":
+        print("Operación cancelada.")
+
+    return msg
+
+
+
 def menuRegistradoAPI():
     print("Elige una de las opciones:")
     print(" 1. Ir al Mapa")
@@ -221,7 +264,14 @@ def menuRegistradoAPI():
         menuRegistradoAPI()
 
     elif int(seleccion) == 3:
-        menuRegistradoAPI()
+        resp = borrarUsuarioAPI()
+
+        if resp == "No se ha podido borrar el usuario." or resp == "":
+            menuRegistradoAPI()
+        else:
+            borrarCurrent(currentUser)
+            menuAPI()
+
     elif int(seleccion) == 0:
         print("Saliendo de la aplicacion...")
 
