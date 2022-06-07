@@ -72,7 +72,7 @@ def comprobarToken(nombre, token):
         )
 
         executeQuery = cnx.cursor()
-        sql = "SELECT * FROM claves WHERE name = '" + nombre + "' and clave='" + token + "'"
+        sql = "SELECT * FROM claves WHERE name = '" + nombre + "'"
         executeQuery.execute(sql)
 
         myresult = executeQuery.fetchone()
@@ -170,10 +170,11 @@ def deleteUsuarios(msg):
             database='sd'
         )
         partes = msg.split(',')
-
-        if comprobarToken(partes[1], partes[3]):
+        print(partes)
+        if comprobarToken(partes[1], partes[2]):
+            print("BORRAR")
             executeQuery = cnx.cursor()
-            sql = "DELETE FROM usuarios WHERE password = '" + partes[2] + "' and nombre = '" + partes[1] + "'"
+            sql = "DELETE FROM usuarios WHERE nombre = '" + partes[1] + "'"
             executeQuery.execute(sql)
 
             cnx.commit()
@@ -191,8 +192,8 @@ def deleteUsuarios(msg):
 
             cnx2.commit()
             cnx2.close()
-        return ("Usuario borrado correctamente.")
-
+            return ("Usuario borrado correctamente.")
+        return("No se ha podido borrar...")
     except Exception as e:
         return ("No se ha podido borrar el usuario...")
 
@@ -228,10 +229,8 @@ def threadsHandler(connHandler, addrHandler):
 
     while comprobarBucle:
         try:
-            print("hola 1")
             msg_length = connHandler.recv(HEADER).decode(FORMATO_MSG)
             if msg_length:
-                print("hola 2")
                 msg_length = int(msg_length)
                 msg = connHandler.recv(msg_length).decode(FORMATO_MSG)
 
@@ -241,8 +240,9 @@ def threadsHandler(connHandler, addrHandler):
                     comprobarBucle = False
 
                 elif "deleteUsuario" in msg:
-                    deleteUsuarios(str(msg))
-                    connHandler.send("Sesión cerrada y usuario eliminado.")
+                    print("ENTRA delete")
+                    result = deleteUsuarios(str(msg))
+                    connHandler.send(result.encode(FORMATO_MSG))
 
                 elif "crearUsuario" in msg:
                     result = crearUsuario(str(msg))

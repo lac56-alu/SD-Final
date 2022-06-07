@@ -105,6 +105,7 @@ def modificarUsuario():
             if password == password2:
                 comprobarPass = True
 
+        asignarNombrePass(currentUser[0], password, currentUser)
         cadena = "modificar," + currentUser[0] + "," + password + "," + currentUser[2]
         return cadena
     else:
@@ -138,19 +139,16 @@ def menuRegistradoSockets():
     elif int(seleccion) == 3:
         print("¿Seguro que quiere borrar su usuario? y/n")
         seleccion = input()
+        sys.stdin.flush()
 
         if seleccion == "y":
-            print(" Introduzca la contraseña actual: ")
-            password = input()
+            cadenaBorrar = "deleteUsuario," + currentUser[0] + "," + currentUser[2]
+            enviarMensaje(cadenaBorrar)
+            msg = cliente.recv(HEADER).decode(FORMATO_MSG)
+            print(msg)
 
-            if password == currentUser[1]:
-                cadenaBorrar = "deleteUsuario," + currentUser[0] + "," + currentUser[1] + "," + currentUser[2]
-                enviarMensaje(cadenaBorrar)
-                msg = cliente.recv(HEADER).decode(FORMATO_MSG)
-                print(msg)
-            else:
-                print("Credenciales Incorrectas.")
-                menuRegistradoSockets()
+            borrarCurrent(currentUser)
+            menuSockets()
         else:
             menuRegistradoSockets()
     elif int(seleccion) == 0:
