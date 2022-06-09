@@ -15,7 +15,7 @@ MAX_CONEXIONES: int = 500
 CONEXIONES_ACTIVAS: int = 0
 
 mensajeMaxConex = "Se ha superado el número de conexiones permitidas... (max = 500)"
-""""""
+
 class User:
     nombre = ""
     password = ""
@@ -170,9 +170,7 @@ def deleteUsuarios(msg):
             database='sd'
         )
         partes = msg.split(',')
-        print(partes)
         if comprobarToken(partes[1], partes[2]):
-            print("BORRAR")
             executeQuery = cnx.cursor()
             sql = "DELETE FROM usuarios WHERE nombre = '" + partes[1] + "'"
             executeQuery.execute(sql)

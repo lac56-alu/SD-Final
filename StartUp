@@ -6,4 +6,9 @@ py ./FWQ_Visitor.py 192.168.56.1 5432 1 1 localhost 50352
 
  - FWQ_Registry:
 cd C:\Users\luis2\Desktop\2021 - 2022\Primer Cuatri\SD\Practicas\Practica Final
-py ./FWQ_Registry1.py 5432
+py ./FWQ_Registry.py 5432
+
+
+ - FWQ_Sensor:
+cd C:\Users\luis2\Desktop\2021 - 2022\Primer Cuatri\SD\Practicas\Practica Final
+py ./FWQ_Sensor.py 127.0.0.1 61613 2

@@ -16,6 +16,8 @@ puertoBroker = 0
 ipAPI = 0
 puertoAPI = 0
 serverAPI = "/lac56-alu/SD-REGISTRY/1.0.0/"
+topicVisitor = "/topic/VISITOR"
+topicEngine = "/ENGINE"
 
 currentUser = []
 
@@ -42,6 +44,14 @@ def enviarMensaje(msg):
     send_length += b' ' * (HEADER - len(send_length))
     cliente.send(send_length)
     cliente.send(nuevoMSG)
+
+def enviarTopics(msg):
+    print(msg)
+    headerDestination = ""
+
+def mostrarMapa():
+    print("----------------------- MAPA -----------------------")
+
 
 
 def menuInicio():
@@ -124,6 +134,7 @@ def menuRegistradoSockets():
 
     if int(seleccion) == 1:
         print("Mostrando Mapa")
+        mostrarMapa()
 
     elif int(seleccion) == 2:
         datosModificarUsuario = modificarUsuario()
