@@ -3,9 +3,8 @@ import sys
 import time
 import socket
 import threading
-
-import mysql.connector
 import stomp
+import mysql.connector
 
 mensajeMaxConex = "Se ha superado el número de conexiones permitidas... (max = 8)"
 HEADER = 100
@@ -20,15 +19,26 @@ class Listener(object):
     def on_message(headers, message):
         # ESTE ES EL TOPIC QUE ESTA A LA ESCUCHA
         if(message.headers['destination'] == topic):
-            print("entra en lo del topic")
-            print(message.body)
-            updateTiempos(message.body)
+            print("Mensaje:", message.body)
+            print(calcularTiempo(message.body))
+            print("-----------------------------------------------------------------------------")
 
 
 def threadsHandler():
     print("ENTRA EN EL HANDLER")
+    cadena = str(arrayAtracciones[0][1]) + "," + str(arrayAtracciones[1][1]) + "," + str(arrayAtracciones[2][1]) + "," + str(arrayAtracciones[3][1]) + "," \
+             + str(arrayAtracciones[4][1]) + "," + str(arrayAtracciones[5][1]) + "," + str(arrayAtracciones[6][1]) + "," + str(arrayAtracciones[7][1])
 
-def updateTiempos(msg):
+    print(cadena)
+
+
+def calcularTiempo(msg):
+    partes = msg.split(',')
+    tiempoEspera = int(partes[1]) * 5
+
+    arrayAtracciones[int(partes[0])][1] = tiempoEspera
+    print("Tiempo de espera: ", arrayAtracciones[int(partes[0])][1], " min")
+
     try:
         cnx = mysql.connector.connect(
             user='luis',
@@ -36,20 +46,19 @@ def updateTiempos(msg):
             host='127.0.0.1',
             database='sd'
         )
-        partes = msg.split(',')
-        print(partes)
 
         executeQuery = cnx.cursor()
-        sql = "UPDATE tiemposespera SET tiempo = " + partes[1] + " WHERE atraccion = " + partes[0]
+        sql = "UPDATE tiempoespera SET tiempo = " + str(tiempoEspera) + " WHERE atraccion = " + str(partes[0])
         executeQuery.execute(sql)
 
         cnx.commit()
         cnx.close()
-        return ("Se ha modificado el tiempo de espera correctamente.")
+        return("Se ha modificado el tiempo correctamente.")
 
     except Exception as e:
-        print(e)
-        return ("Se ha producido un error al modificar el usuario...")
+        return ("Se ha producido un error al modificar el tiempo...")
+
+
 
 
 def main():
@@ -76,14 +85,14 @@ def start():
             thread = threading.Thread(target=threadsHandler, args=(connServer, addrServer))
             thread.start()
 
-atraccion1 = [33, 3]
-atraccion2 = [86, 4]
-atraccion3 = [137, 2]
-atraccion4 = [143, 5]
-atraccion5 = [255, 3]
-atraccion6 = [262, 4]
-atraccion7 = [328, 3]
-atraccion8 = [373, 4]
+atraccion1 = [33, 0]
+atraccion2 = [86, 0]
+atraccion3 = [137, 0]
+atraccion4 = [143, 0]
+atraccion5 = [255, 0]
+atraccion6 = [262, 0]
+atraccion7 = [328, 0]
+atraccion8 = [373, 0]
 
 arrayAtracciones = []
 arrayAtracciones.append(atraccion1)
@@ -99,14 +108,14 @@ arrayAtracciones.append(atraccion8)
 # ---------------------------------- MAIN -----------------------------
 ipActive = sys.argv[1]
 puertoActive = sys.argv[2]
-ipServer = sys.argv[3]
+puertoServer = sys.argv[3]
 
 
 try:
     main()
 
     SERVIDOR = socket.gethostbyname(socket.gethostname())
-    DIRECCION = (SERVIDOR, int(ipServer))
+    DIRECCION = (SERVIDOR, int(puertoServer))
 
     server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     server.bind(DIRECCION)
