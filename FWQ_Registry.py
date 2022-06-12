@@ -16,6 +16,8 @@ CONEXIONES_ACTIVAS: int = 0
 
 mensajeMaxConex = "Se ha superado el número de conexiones permitidas... (max = 500)"
 
+
+
 class User:
     nombre = ""
     password = ""

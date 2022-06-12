@@ -1,5 +1,4 @@
 # ---------------------------------- IMPORTS -----------------------------
-import random
 import sys
 import stomp
 from time import sleep

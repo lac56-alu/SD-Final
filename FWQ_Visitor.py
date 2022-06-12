@@ -4,6 +4,7 @@ import socket
 from time import sleep
 import sys
 import requests
+import stomp
 
 # ---------------------- Variables Globales ----------------------
 HEADER = 100
@@ -17,7 +18,10 @@ ipAPI = 0
 puertoAPI = 0
 serverAPI = "/lac56-alu/SD-REGISTRY/1.0.0/"
 topicVisitor = "/topic/VISITOR"
-topicEngine = "/ENGINE"
+topicEngine = "/topic/engine"
+ipActiveMQ = '127.0.0.1'
+puertoActiveMQ = 61613
+
 
 currentUser = []
 
@@ -45,9 +49,14 @@ def enviarMensaje(msg):
     cliente.send(send_length)
     cliente.send(nuevoMSG)
 
-def enviarTopics(msg):
-    print(msg)
-    headerDestination = ""
+def enviarEngine(msg):
+    try:
+        print(msg)
+        conn = stomp.Connection([(ipActiveMQ, puertoActiveMQ)])
+        conn.connect(login="", passcode="", wait=True)
+        conn.send(topicEngine, msg, headers=None)
+    except Exception as e:
+        print("Error Enviar Mensaje:", e)
 
 def mostrarMapa():
     print("----------------------- MAPA -----------------------")
@@ -126,15 +135,17 @@ def modificarUsuario():
 
 def menuRegistradoSockets():
     print("Elige una de las opciones:")
-    print(" 1. Ir al Mapa")
+    print(" 1. Entrar al parque")
     print(" 2. Editar Perfil")
     print(" 3. Borrar Perfil")
     print(" 0. Salir")
     seleccion = input()
 
     if int(seleccion) == 1:
-        print("Mostrando Mapa")
-        mostrarMapa()
+        msg = "entrar," + str(currentUser[0])
+        enviarEngine(msg)
+        """msg = "salir," + str(currentUser[0])
+        enviarEngine(msg)"""
 
     elif int(seleccion) == 2:
         datosModificarUsuario = modificarUsuario()
@@ -289,6 +300,7 @@ def menuRegistradoAPI():
 
     if int(seleccion) == 1:
         print("Mostrando Mapa")
+
 
     elif int(seleccion) == 2:
         modificarUsuarioAPI()
