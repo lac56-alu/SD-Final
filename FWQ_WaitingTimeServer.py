@@ -10,6 +10,7 @@ mensajeMaxConex = "Se ha superado el número de conexiones permitidas... (max = 
 HEADER = 100
 FORMATO_MSG = 'utf-8'
 topic = "/topic/sensor"
+topic2 = "/topic/waiting"
 
 class Listener(object):
     def __init__(self, conn):
@@ -23,14 +24,53 @@ class Listener(object):
             print(calcularTiempo(message.body))
             print("-----------------------------------------------------------------------------")
 
+class Listener2(object):
+    def __init__(self, conn):
+        self.conn = conn
+        self.count = 0
+        self.start = time.time()
+    def on_message(headers, message):
+        # ESTE ES EL TOPIC QUE ESTA A LA ESCUCHA
+        if (message.headers['destination'] == topic2):
+            print("Mensaje:", message.body)
+            print(montarCadenaTiempos())
+            print("-----------------------------------------------------------------------------")
+
+
+
+
 
 def threadsHandler():
     print("ENTRA EN EL HANDLER")
+
+
+def montarCadenaTiempos():
+    print(arrayAtracciones)
     cadena = str(arrayAtracciones[0][1]) + "," + str(arrayAtracciones[1][1]) + "," + str(arrayAtracciones[2][1]) + "," + str(arrayAtracciones[3][1]) + "," \
              + str(arrayAtracciones[4][1]) + "," + str(arrayAtracciones[5][1]) + "," + str(arrayAtracciones[6][1]) + "," + str(arrayAtracciones[7][1])
+    print(cadena)
+    try:
+        cnx = mysql.connector.connect(
+            user='luis',
+            password='root',
+            host='127.0.0.1',
+            database='sd'
+        )
+
+        executeQuery = cnx.cursor()
+        sql = "INSERT INTO tiempostotal(tiempos) VALUES ('" + str(cadena) + "')"
+        print(sql)
+        executeQuery.execute(sql)
+
+        cnx.commit()
+        cnx.close()
+        return("Se ha insertado el tiempo correctamente.")
+
+    except Exception as e:
+        print(e)
+        return ("Se ha producido un error al modificar el tiempo...")
 
     print(cadena)
-
 
 def calcularTiempo(msg):
     partes = msg.split(',')
@@ -67,6 +107,12 @@ def main():
     conn.set_listener('listener', listener)
     conn.connect(login="", passcode="", wait=True)
     conn.subscribe(topic, id=1, ack='auto')
+
+    conn2 = stomp.Connection([(ipActive, int(puertoActive))])
+    listener2 = Listener2(conn2)
+    conn2.set_listener('listener', listener2)
+    conn2.connect(login="", passcode="", wait=True)
+    conn2.subscribe(topic2, id=1, ack='auto')
 
 def start():
     server.listen()

@@ -1,9 +1,10 @@
 import sys
 import time
 import stomp
+import mysql.connector
 
 # ---------------------- Variables Globales --- -------------------
-mapa = ['#','#','#','#','#','#','#','#','#','#','#','#','#','#','#','#','#','#','#','#',
+mapaGlobal = ['#','#','#','#','#','#','#','#','#','#','#','#','#','#','#','#','#','#','#','#',
         '#','#','#','#','#','#','#','#','#','#','#','#','#','X','#','#','#','#','#','#',
         '#','#','#','#','#','#','#','#','#','#','#','#','#','#','#','#','#','#','#','#',
         '#','#','#','#','#','#','#','#','#','#','#','#','#','#','#','#','#','#','#','#',
@@ -27,6 +28,7 @@ mapa = ['#','#','#','#','#','#','#','#','#','#','#','#','#','#','#','#','#','#',
 host = '127.0.0.1'
 port = 61613
 topic = "/topic/engine"
+topic2 = "/topic/waiting"
 ipActiveMQ = '127.0.0.1'
 puertoActiveMQ = 61613
 usuariosParque = []
@@ -53,19 +55,82 @@ class Listener(object):
         if(message.headers['destination'] == topic):
             if message.body == "mostrarMapa":
                 mapa = montarMapa()
+
             elif "entrar" in message.body:
                 entrarParque(message.body)
+                mapa = mapaToString(mapaGlobal)
             elif "salir" in message.body:
                 salirParque(message.body)
 
             print("Mensaje:", message.body)
             print("-----------------------------------------------------------------------------")
 
+def mapaToString(mapa):
+    posi = 0
+    numAtraccion = 0
+
+    mapaString = ""
+    salto = 19
+    print(len(mapa))
+    tiempos = consultarTiempo()
+    partes = tiempos.split(',')
+    for i in range(0, len(mapa)):
+
+        if mapa[i] == 'X':
+            mapaString += partes[numAtraccion] + " "
+            numAtraccion += 1
+        else:
+            mapaString += mapa[i] + " "
+
+        if posi == salto:
+            mapaString += "\n"
+            salto = 20
+            posi = 0
+        posi += 1
+    print(mapaString)
+    return mapaString
+
+
+def consultarTiempo():
+    msg = "yes"
+    conn = stomp.Connection([(ipActiveMQ, puertoActiveMQ)])
+    conn.connect(login="", passcode="", wait=True)
+    conn.send(topic2, msg, headers=None)
+
+    try:
+        cnx = mysql.connector.connect(
+            user='luis',
+            password='root',
+            host='127.0.0.1',
+            database='sd'
+        )
+
+        executeQuery = cnx.cursor()
+        sql = "select tiempos from tiempostotal where id = (select max(id) from tiempostotal)"
+        executeQuery.execute(sql)
+
+        myresult = executeQuery.fetchone()
+
+        if myresult == None:
+            cnx.commit()
+            cnx.close()
+            return ("No encontrado")
+        else:
+            cnx.commit()
+            cnx.close()
+            resp = str(myresult[0])
+            return resp
+
+    except Exception as e:
+        print(e)
+        return ("Se ha producido un error al consultar el tiempo...")
+
 
 def entrarParque(msg):
     partes = msg.split(',')
     usuario = User(partes[1], 0)
     usuariosParque.append(usuario)
+    print()
 
 def salirParque(msg):
     partes = msg.split(',')

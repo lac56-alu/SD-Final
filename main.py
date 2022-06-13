@@ -1,30 +1,18 @@
-from time import sleep
+import stomp
 
-import mysql
+topicEngine = "/topic/engine"
+ipActiveMQ = '127.0.0.1'
+puertoActiveMQ = 61613
 
-msg = "logIn,luis,prueba2"
-
-try:
-    cnx = mysql.connector.connect(
-        user='luis',
-        password='root',
-        host='127.0.0.1',
-        database='sd'
-    )
-    partes = msg.split(',')
-    executeQuery = cnx.cursor()
-    sql = "SELECT * FROM usuarios WHERE password = '" + partes[2] + "' and nombre = '" + partes[1] + "'"
-    executeQuery.execute(sql)
-
-    myresult = executeQuery.fetchall()
-    for row in myresult:
-        print(row[0])
-        print(row[1])
-        print(row[2])
-
-    cnx.commit()
-    cnx.close()
+def enviarEngine(msg):
+    try:
+        print(msg)
+        conn = stomp.Connection([(ipActiveMQ, puertoActiveMQ)])
+        conn.connect(login="", passcode="", wait=True)
+        conn.send(topicEngine, msg, headers=None)
+    except Exception as e:
+        print("Error Enviar Mensaje:", e)
 
 
-except Exception as e:
-    print ("Se ha producido un error al hacer logIn...")
+msg = "entrar,raq"
+enviarEngine(msg)
