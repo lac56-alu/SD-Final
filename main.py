@@ -16,3 +16,9 @@ def enviarEngine(msg):
 
 msg = "entrar,raq"
 enviarEngine(msg)
+
+msg = "mover,raq,S"
+enviarEngine(msg)
+
+msg = "mostrarMapa,raq"
+enviarEngine(msg)

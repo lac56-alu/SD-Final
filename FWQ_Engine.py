@@ -53,19 +53,37 @@ class Listener(object):
     def on_message(headers, message):
         # ESTE ES EL TOPIC QUE ESTA A LA ESCUCHA
         if(message.headers['destination'] == topic):
-            if message.body == "mostrarMapa":
-                mapa = montarMapa()
+            if "mostrarMapa" in message.body:
+                partes = message.body.split(',')
+                mapa = mapaToString(mapaGlobal, partes[1])
 
             elif "entrar" in message.body:
                 entrarParque(message.body)
-                mapa = mapaToString(mapaGlobal)
+
+                partes = message.body.split(',')
+                mapa = mapaToString(mapaGlobal, partes[1])
+
             elif "salir" in message.body:
                 salirParque(message.body)
+
+            elif "mover" in message.body:
+                movimientoUsuario(message.body)
 
             print("Mensaje:", message.body)
             print("-----------------------------------------------------------------------------")
 
-def mapaToString(mapa):
+def enviarEngine(msg, top):
+    try:
+        print("Enviar: ", msg)
+        conn = stomp.Connection([(ipActiveMQ, puertoActiveMQ)])
+        conn.connect(login="", passcode="", wait=True)
+        conn.send(top, msg, headers=None)
+    except Exception as e:
+        print("Error Enviar Mensaje:", e)
+
+
+
+def mapaToString(mapa, nombre):
     posi = 0
     numAtraccion = 0
 
@@ -75,6 +93,8 @@ def mapaToString(mapa):
     tiempos = consultarTiempo()
     partes = tiempos.split(',')
     for i in range(0, len(mapa)):
+        if comprobarPosicion(i, nombre) == True:
+            mapaString += "X "
 
         if mapa[i] == 'X':
             mapaString += partes[numAtraccion] + " "
@@ -88,7 +108,68 @@ def mapaToString(mapa):
             posi = 0
         posi += 1
     print(mapaString)
+    if mapaString != "":
+        try:
+            cnx = mysql.connector.connect(
+                user='luis',
+                password='root',
+                host='127.0.0.1',
+                database='sd'
+            )
+
+            executeQuery = cnx.cursor()
+            sql = "INSERT INTO mapaparque(mapa) values ('" + mapaString + "')"
+            executeQuery.execute(sql)
+
+            cnx.commit()
+            cnx.close()
+        except Exception as e:
+            return ("Se ha producido un error al guardar el mapa en la BD...")
+
     return mapaString
+
+def movimientoUsuario(msg):
+    partes = msg.split(',')
+    nombre = partes[1]
+    mov = partes[2]
+
+
+    desplazamiento = 0
+    usuarioPosi = 0
+
+    if mov == 'N':
+        desplazamiento = -20
+    elif mov == 'NE':
+        desplazamiento = -19
+    elif mov == 'E':
+        desplazamiento = 1
+    elif mov == 'SE':
+        desplazamiento = 21
+    elif mov == 'S':
+        desplazamiento = 20
+    elif mov == 'SO':
+        desplazamiento = 19
+    elif mov == 'O':
+        desplazamiento = -1
+    elif mov == 'NO':
+        desplazamiento = -21
+
+    for i in range(0, len(usuariosParque)):
+        if usuariosParque[i].nombre == nombre:
+            usuarioPosi = i
+            comprobar = True
+            break
+
+    newPosi = usuariosParque[usuarioPosi].posicion + desplazamiento
+    print("Posicion Actual: ", str(usuariosParque[usuarioPosi].posicion))
+    print("Desplazamiento: ", str(desplazamiento))
+    print("Posicion Final: ", newPosi)
+
+    if comprobar == True and newPosi >= 0 and newPosi <= 399:
+        usuariosParque[usuarioPosi].posicion = newPosi
+    else:
+        print("No se puede realizar el desplazamiento")
+
 
 
 def consultarTiempo():
@@ -139,11 +220,15 @@ def salirParque(msg):
             usuariosParque.pop(i)
             break
 
-def montarMapa():
-    print("------- MOSTRAR MAPA -------")
-    mapa = ""
+def comprobarPosicion(posi, nombre):
+    comprobar = False
 
-    return mapa
+    for i in range(0, len(usuariosParque)):
+        if usuariosParque[i].posicion == posi and usuariosParque[i].nombre == nombre:
+            comprobar = True
+            break
+
+    return comprobar
 
 def activeMQ():
     conn = stomp.Connection([(ipActiveMQ, puertoActiveMQ)])

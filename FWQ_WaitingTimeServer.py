@@ -131,14 +131,23 @@ def start():
             thread = threading.Thread(target=threadsHandler, args=(connServer, addrServer))
             thread.start()
 
-atraccion1 = [33, 0]
+"""atraccion1 = [33, 0]
 atraccion2 = [86, 0]
 atraccion3 = [137, 0]
 atraccion4 = [143, 0]
 atraccion5 = [255, 0]
 atraccion6 = [262, 0]
 atraccion7 = [328, 0]
-atraccion8 = [373, 0]
+atraccion8 = [373, 0]"""
+
+atraccion1 = [33, 2]
+atraccion2 = [86, 5]
+atraccion3 = [137, 2]
+atraccion4 = [143, 3]
+atraccion5 = [255, 4]
+atraccion6 = [262, 4]
+atraccion7 = [328, 2]
+atraccion8 = [373, 1]
 
 arrayAtracciones = []
 arrayAtracciones.append(atraccion1)
