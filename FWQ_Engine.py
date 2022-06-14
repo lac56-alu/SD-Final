@@ -118,7 +118,7 @@ def mapaToString(mapa, nombre):
             )
 
             executeQuery = cnx.cursor()
-            sql = "INSERT INTO mapaparque(mapa) values ('" + mapaString + "')"
+            sql = "INSERT INTO mapaparque(mapa, usuario) values ('" + mapaString + "', '"+ nombre+ "')"
             executeQuery.execute(sql)
 
             cnx.commit()
@@ -211,7 +211,10 @@ def entrarParque(msg):
     partes = msg.split(',')
     usuario = User(partes[1], 0)
     usuariosParque.append(usuario)
-    print()
+
+    top = "/topic/" + str(partes[1])
+    print(top)
+    enviarEngine("Entrada correcta, difrute del parque.", top)
 
 def salirParque(msg):
     partes = msg.split(',')

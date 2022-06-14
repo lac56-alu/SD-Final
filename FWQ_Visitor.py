@@ -5,6 +5,7 @@ from time import sleep
 import sys
 import requests
 import stomp
+import time
 
 # ---------------------- Variables Globales ----------------------
 HEADER = 100
@@ -21,6 +22,7 @@ topicVisitor = "/topic/VISITOR"
 topicEngine = "/topic/engine"
 ipActiveMQ = '127.0.0.1'
 puertoActiveMQ = 61613
+global topicRespuesta
 
 
 currentUser = []
@@ -39,6 +41,18 @@ def asignarTODO(u,p,t, currentUser):
 
 def borrarCurrent(currentUser):
     currentUser = []
+
+class Listener(object):
+    def __init__(self, conn):
+        self.conn = conn
+        self.count = 0
+        self.start = time.time()
+    def on_message(headers, message):
+        # ESTE ES EL TOPIC QUE ESTA A LA ESCUCHA
+        topicRespuesta = "/topic/" + str(currentUser[0])
+        if(message.headers['destination'] == topicRespuesta):
+            print(message.body)
+
 
 # ---------------------- Modulos SOCKETS ----------------------
 def enviarMensaje(msg):
@@ -132,6 +146,15 @@ def modificarUsuario():
         print("Credenciales incorrectas")
         return cadena
 
+def crearListener(topic):
+    conn = stomp.Connection([(ipActiveMQ, int(puertoActiveMQ))])
+    listener = Listener(conn)
+    conn.set_listener('listener', listener)
+    conn.connect(login="", passcode="", wait=True)
+    conn.subscribe(topic, id=1, ack='auto')
+
+def entradaParque():
+
 
 def menuRegistradoSockets():
     print("Elige una de las opciones:")
@@ -142,10 +165,14 @@ def menuRegistradoSockets():
     seleccion = input()
 
     if int(seleccion) == 1:
+        topicRespuesta = "/topic/" + str(currentUser[0])
+        crearListener(topicRespuesta)
+
         msg = "entrar," + str(currentUser[0])
         enviarEngine(msg)
-        """msg = "salir," + str(currentUser[0])
-        enviarEngine(msg)"""
+
+        entradaParque()
+
 
     elif int(seleccion) == 2:
         datosModificarUsuario = modificarUsuario()
