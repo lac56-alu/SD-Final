@@ -55,19 +55,22 @@ class Listener(object):
         if(message.headers['destination'] == topic):
             if "mostrarMapa" in message.body:
                 partes = message.body.split(',')
-                mapa = mapaToString(mapaGlobal, partes[1])
+                mapaToString(mapaGlobal, partes[1])
+
 
             elif "entrar" in message.body:
                 entrarParque(message.body)
 
                 partes = message.body.split(',')
-                mapa = mapaToString(mapaGlobal, partes[1])
+                mapaToString(mapaGlobal, partes[1])
 
             elif "salir" in message.body:
                 salirParque(message.body)
 
             elif "mover" in message.body:
                 movimientoUsuario(message.body)
+                partes = message.body.split(',')
+                mapaToString(mapaGlobal, partes[1])
 
             print("Mensaje:", message.body)
             print("-----------------------------------------------------------------------------")
@@ -95,18 +98,19 @@ def mapaToString(mapa, nombre):
     for i in range(0, len(mapa)):
         if comprobarPosicion(i, nombre) == True:
             mapaString += "X "
-
-        if mapa[i] == 'X':
-            mapaString += partes[numAtraccion] + " "
-            numAtraccion += 1
+            posi += 1
         else:
-            mapaString += mapa[i] + " "
+            if mapa[i] == 'X':
+                mapaString += partes[numAtraccion] + " "
+                numAtraccion += 1
+            else:
+                mapaString += mapa[i] + " "
 
-        if posi == salto:
-            mapaString += "\n"
-            salto = 20
-            posi = 0
-        posi += 1
+            if posi == salto:
+                mapaString += "\n"
+                salto = 20
+                posi = 0
+            posi += 1
     print(mapaString)
     if mapaString != "":
         try:
@@ -123,6 +127,8 @@ def mapaToString(mapa, nombre):
 
             cnx.commit()
             cnx.close()
+            top = "/topic/" + nombre
+            enviarEngine(mapaString, top)
         except Exception as e:
             return ("Se ha producido un error al guardar el mapa en la BD...")
 
@@ -132,7 +138,6 @@ def movimientoUsuario(msg):
     partes = msg.split(',')
     nombre = partes[1]
     mov = partes[2]
-
 
     desplazamiento = 0
     usuarioPosi = 0
@@ -222,6 +227,9 @@ def salirParque(msg):
         if usuariosParque[i].nombre == partes[1]:
             usuariosParque.pop(i)
             break
+    top = "/topic/" + str(partes[1])
+    print(top)
+    enviarEngine("Salida correcta, esperamos que vuelva pronto.", top)
 
 def comprobarPosicion(posi, nombre):
     comprobar = False

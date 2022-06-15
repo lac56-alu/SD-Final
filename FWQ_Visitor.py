@@ -65,7 +65,6 @@ def enviarMensaje(msg):
 
 def enviarEngine(msg):
     try:
-        print(msg)
         conn = stomp.Connection([(ipActiveMQ, puertoActiveMQ)])
         conn.connect(login="", passcode="", wait=True)
         conn.send(topicEngine, msg, headers=None)
@@ -154,9 +153,45 @@ def crearListener(topic):
     conn.subscribe(topic, id=1, ack='auto')
 
 def entradaParque():
+    sleep(2)
+    print("Elige una de las opciones:")
+    print(" 1. Mostrar el mapa")
+    print(" 2. Movimiento")
+    print(" 0. Salir del parque")
+    seleccion = input()
+
+    if int(seleccion) == 1:
+        msg = "mostrarMapa," + currentUser[0]
+        enviarEngine(msg)
+
+        entradaParque()
+
+    elif int(seleccion) == 2:
+        comprobarOpcion = False
+
+        while comprobarOpcion == False:
+            print("¿Hacia donde quieres desplazarte?")
+            print("Opciones: N, NE, E, SE, S, SO, O, NO")
+            direccion = input()
+
+            if direccion == 'N' or direccion == 'NE' or direccion == 'E' or direccion == 'SE' or direccion == 'S' or direccion == 'SO' or direccion == 'O' or direccion == 'NO':
+                comprobarOpcion = True
+                break
+
+        msg = "mover," + currentUser[0] + "," + direccion
+        enviarEngine(msg)
+
+        entradaParque()
+
+    elif int(seleccion) == 0:
+        msg = "salir," + currentUser[0]
+        enviarEngine(msg)
+
+        menuRegistradoSockets()
 
 
 def menuRegistradoSockets():
+    sleep(2)
     print("Elige una de las opciones:")
     print(" 1. Entrar al parque")
     print(" 2. Editar Perfil")
