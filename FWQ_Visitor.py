@@ -71,10 +71,6 @@ def enviarEngine(msg):
     except Exception as e:
         print("Error Enviar Mensaje:", e)
 
-def mostrarMapa():
-    print("----------------------- MAPA -----------------------")
-
-
 
 def menuInicio():
     print("Elige método de conexión:")
@@ -152,7 +148,7 @@ def crearListener(topic):
     conn.connect(login="", passcode="", wait=True)
     conn.subscribe(topic, id=1, ack='auto')
 
-def entradaParque():
+def entradaParque(activador):
     sleep(2)
     print("Elige una de las opciones:")
     print(" 1. Mostrar el mapa")
@@ -187,7 +183,10 @@ def entradaParque():
         msg = "salir," + currentUser[0]
         enviarEngine(msg)
 
-        menuRegistradoSockets()
+        if activador == "sck":
+            menuRegistradoSockets()
+        elif activador == "api":
+            menuRegistradoAPI()
 
 
 def menuRegistradoSockets():
@@ -206,8 +205,8 @@ def menuRegistradoSockets():
         msg = "entrar," + str(currentUser[0])
         enviarEngine(msg)
 
-        entradaParque()
-
+        activador = "sck"
+        entradaParque(activador)
 
     elif int(seleccion) == 2:
         datosModificarUsuario = modificarUsuario()
@@ -354,14 +353,21 @@ def borrarUsuarioAPI():
 
 def menuRegistradoAPI():
     print("Elige una de las opciones:")
-    print(" 1. Ir al Mapa")
+    print(" 1. Entrar al parque")
     print(" 2. Editar Perfil")
     print(" 3. Borrar Perfil")
     print(" 0. Salir")
     seleccion = input()
 
     if int(seleccion) == 1:
-        print("Mostrando Mapa")
+        topicRespuesta = "/topic/" + str(currentUser[0])
+        crearListener(topicRespuesta)
+
+        msg = "entrar," + str(currentUser[0])
+        enviarEngine(msg)
+
+        activador = "api"
+        entradaParque(activador)
 
 
     elif int(seleccion) == 2:

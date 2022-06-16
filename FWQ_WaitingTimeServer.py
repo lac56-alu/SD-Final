@@ -37,9 +37,6 @@ class Listener2(object):
             print("-----------------------------------------------------------------------------")
 
 
-
-
-
 def threadsHandler():
     print("ENTRA EN EL HANDLER")
 
