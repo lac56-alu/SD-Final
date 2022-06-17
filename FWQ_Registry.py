@@ -292,8 +292,3 @@ server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 server.bind(DIRECCION)
 
 start()
-
-#crearUsuario("luis", "hola")
-#crearUsuario("pepe", "hola")
-#modificarUsuario("luis", "prueba2")
-#deleteUsuarios("pepe", "hola")

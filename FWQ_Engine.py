@@ -33,6 +33,7 @@ ipActiveMQ = '127.0.0.1'
 puertoActiveMQ = 61613
 usuariosParque = []
 posicionesAtracciones = [33, 86, 137, 143, 255, 262, 328, 373]
+saltoPosiciones = [19, 39, 59, 79, 99, 119, 139, 159, 179, 199, 219, 239, 259, 279, 299, 319, 339, 359, 379, 399]
 
 posicionesCuadrante0 = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 40, 41, 42, 43, 44, 45, 46,
                        47, 48, 49, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 100,
@@ -113,7 +114,6 @@ def enviarEngine(msg, top):
 
 
 def mapaToString(mapa, nombre):
-    posi = 0
     numAtraccion = 0
 
     mapaString = ""
@@ -134,42 +134,32 @@ def mapaToString(mapa, nombre):
             if i in posicionesCuadrante0:
                 if cuadratesActivos[0] == 'no':
                     mapaString += "- "
-                    posi += 1
                 else:
                     mapaString += partes[numAtraccion] + " "
                     numAtraccion += 1
-                    posi += 1
             elif i in posicionesCuadrante1:
                 if cuadratesActivos[1] == 'no':
                     mapaString += "- "
-                    posi += 1
                 else:
                     mapaString += partes[numAtraccion] + " "
                     numAtraccion += 1
-                    posi += 1
             elif i in posicionesCuadrante2:
                 if cuadratesActivos[2] == 'no':
                     mapaString += "- "
-                    posi += 1
                 else:
                     mapaString += partes[numAtraccion] + " "
                     numAtraccion += 1
-                    posi += 1
             elif i in posicionesCuadrante3:
                 if cuadratesActivos[3] == 'no':
                     mapaString += "- "
-                    posi += 1
                 else:
                     mapaString += partes[numAtraccion] + " "
                     numAtraccion += 1
-                    posi += 1
         else:
             if comprobarPosicion(i, nombre) == True:
                 mapaString += "T "
-                posi += 1
             elif comprobarUsuarioPosicion(i) == True:
                 mapaString += "X "
-                posi += 1
             elif i in posicionesCuadrante0:
                 if cuadratesActivos[0] == 'no':
                     mapaString += "- "
@@ -191,11 +181,9 @@ def mapaToString(mapa, nombre):
                 else:
                     mapaString += mapaGlobal[i] + " "
 
-            if posi == salto:
-                mapaString += "\n"
-                salto = 20
-                posi = 0
-            posi += 1
+        if i in saltoPosiciones:
+            mapaString += "\n"
+
     print(mapaString)
     if mapaString != "":
         try:
@@ -283,10 +271,40 @@ def movimientoUsuario(msg):
             comprobar = True
             break
 
+    consultarCuadrante("0")
+    consultarCuadrante("1")
+    consultarCuadrante("2")
+    consultarCuadrante("3")
+
     newPosi = usuariosParque[usuarioPosi].posicion + desplazamiento
     print("Posicion Actual: ", str(usuariosParque[usuarioPosi].posicion))
     print("Desplazamiento: ", str(desplazamiento))
     print("Posicion Final: ", newPosi)
+
+    if newPosi in posicionesCuadrante0:
+        if cuadratesActivos[0] == 'no':
+            print("Zona NO activa")
+            top = "/topic/" + nombre
+            enviarEngine("Zona NO DISPONIBLE", top)
+            return
+    elif newPosi in posicionesCuadrante1:
+        if cuadratesActivos[1] == 'no':
+            print("Zona NO activa")
+            top = "/topic/" + nombre
+            enviarEngine("Zona NO DISPONIBLE", top)
+        return
+    elif newPosi in posicionesCuadrante2:
+        if cuadratesActivos[2] == 'no':
+            print("Zona NO activa")
+            top = "/topic/" + nombre
+            enviarEngine("Zona NO DISPONIBLE", top)
+            return
+    elif newPosi in posicionesCuadrante3:
+        if cuadratesActivos[3] == 'no':
+            print("Zona NO activa")
+            top = "/topic/" + nombre
+            enviarEngine("Zona NO DISPONIBLE", top)
+            return
 
     if comprobar == True and newPosi >= 0 and newPosi <= 399:
         if newPosi in posicionesAtracciones :

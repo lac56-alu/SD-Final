@@ -23,6 +23,7 @@ topicEngine = "/topic/engine"
 ipActiveMQ = '127.0.0.1'
 puertoActiveMQ = 61613
 global topicRespuesta
+salidaEjecucion = True
 
 
 currentUser = []
@@ -160,7 +161,7 @@ def entradaParque(activador):
         msg = "mostrarMapa," + currentUser[0]
         enviarEngine(msg)
 
-        entradaParque()
+        entradaParque(activador)
 
     elif int(seleccion) == 2:
         comprobarOpcion = False
@@ -177,7 +178,7 @@ def entradaParque(activador):
         msg = "mover," + currentUser[0] + "," + direccion
         enviarEngine(msg)
 
-        entradaParque()
+        entradaParque(activador)
 
     elif int(seleccion) == 0:
         msg = "salir," + currentUser[0]
@@ -500,7 +501,7 @@ ipBroker = sys.argv[3]
 puertoBroker = sys.argv[4]
 ipAPI = sys.argv[5]
 puertoAPI = sys.argv[6]
-
+salidaEjecucion = True
 
 eleccion = menuInicio()
 
@@ -509,20 +510,21 @@ if int(eleccion) == 1:
     cliente = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     parseToInt = int(puertoRegistry)
     direccionRegistro = (ipRegistry, parseToInt)
-    comprobarBucle = False
 
-    while not comprobarBucle:
+    while salidaEjecucion:
         try:
             currentUser = []
             cliente.connect(direccionRegistro)
             print("Conexion completada.")
             print(" ################### SOCKETS ###################")
-            comprobarBucle = True
             menuSockets()
-        except Exception:
+            break
+        except Exception as e:
+            print(e)
             print("No se puede establecer la conexion...")
             print(" Intentandolo de nuevo...")
             sleep(5)
+            break
 else:
     currentUser = []
     menuAPI()

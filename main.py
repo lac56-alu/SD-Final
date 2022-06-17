@@ -31,7 +31,7 @@ r = requests.get('https://api.openweathermap.org/data/2.5/weather?', params=para
 
 respuesta = json.loads(r.content)
 temperatura = int(float(respuesta['main']['temp']) - 273.15)
-print(temperatura)
+print(temperatura)"""
 
 posi = 0
 salto = 19
@@ -46,7 +46,7 @@ for i in range(0, 400):
         cad += "  ||  "
     posi += 1
 
-print(cad)"""
+print(cad)
 posicionesAtracciones = [33, 86, 137, 143, 255, 262, 328, 373]
 mapaGlobal = ['#','#','#','#','#','#','#','#','#','#','#','#','#','#','#','#','#','#','#','#',
         '#','#','#','#','#','#','#','#','#','#','#','#','#','X','#','#','#','#','#','#',
