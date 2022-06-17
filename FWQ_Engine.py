@@ -307,7 +307,7 @@ def movimientoUsuario(msg):
             return
 
     if comprobar == True and newPosi >= 0 and newPosi <= 399:
-        if newPosi in posicionesAtracciones :
+        if newPosi in posicionesAtracciones:
             idAtraccion = posicionesAtracciones.index(newPosi)
             addCola(idAtraccion)
         usuariosParque[usuarioPosi].posicion = newPosi

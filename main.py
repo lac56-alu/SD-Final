@@ -33,7 +33,7 @@ respuesta = json.loads(r.content)
 temperatura = int(float(respuesta['main']['temp']) - 273.15)
 print(temperatura)"""
 
-posi = 0
+"""posi = 0
 salto = 19
 cad = ""
 for i in range(0, 400):
@@ -138,4 +138,13 @@ for i in range(0, len(mapaGlobal)):
             salto = 20
             posi = 0
         posi += 1
-print(mapaString)
+print(mapaString)"""
+import hashlib
+password = "luis"
+
+
+hash = hashlib.sha512(password.encode("utf-8")).hexdigest()
+pos = slice(0,len(hash)//2)
+correctPass = hash[pos]
+print("COMPLETO: ", hash)
+print("PARTIAL: ", correctPass)

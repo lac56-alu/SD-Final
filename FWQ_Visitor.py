@@ -6,6 +6,7 @@ import sys
 import requests
 import stomp
 import time
+import hashlib
 
 # ---------------------- Variables Globales ----------------------
 HEADER = 100
@@ -94,9 +95,13 @@ def logInSockets():
     print(" Constraseña: ")
     password = input()
 
-    asignarNombrePass(userName, password, currentUser)
+    hash = hashlib.sha512(password.encode("utf-8")).hexdigest()
+    pos = slice(0, len(hash) // 2)
+    correctPass = hash[pos]
 
-    cadena = "logIn," + userName + "," + password
+    asignarNombrePass(userName, correctPass, currentUser)
+
+    cadena = "logIn," + userName + "," + str(correctPass)
     return cadena
 
 
@@ -114,8 +119,11 @@ def crearUsuarioSockets():
 
         if password == password2:
             comprobarPass = True
+            hash = hashlib.sha512(password.encode("utf-8")).hexdigest()
+            pos = slice(0, len(hash) // 2)
+            correctPass = hash[pos]
 
-    cadena = "crearUsuario," + userName + "," + password
+    cadena = "crearUsuario," + userName + "," + str(correctPass)
     return cadena
 
 def modificarUsuario():
@@ -133,9 +141,12 @@ def modificarUsuario():
 
             if password == password2:
                 comprobarPass = True
+                hash = hashlib.sha512(password.encode("utf-8")).hexdigest()
+                pos = slice(0, len(hash) // 2)
+                correctPass = hash[pos]
 
-        asignarNombrePass(currentUser[0], password, currentUser)
-        cadena = "modificar," + currentUser[0] + "," + password + "," + currentUser[2]
+        asignarNombrePass(currentUser[0], correctPass, currentUser)
+        cadena = "modificar," + currentUser[0] + "," + correctPass + "," + currentUser[2]
         return cadena
     else:
         cadena = ""
@@ -282,6 +293,10 @@ def modificarUsuarioAPI():
 
     print(" Introduzca la contraseña actual: ")
     passOld = input()
+    hash = hashlib.sha512(passOld.encode("utf-8")).hexdigest()
+    pos = slice(0, len(hash) // 2)
+    correctPassOld = hash[pos]
+
 
     while not comprobarPass:
         print(" Constraseña nueva: ")
@@ -291,10 +306,14 @@ def modificarUsuarioAPI():
 
         if password == password2:
             comprobarPass = True
+            hash = hashlib.sha512(password.encode("utf-8")).hexdigest()
+            pos = slice(0, len(hash) // 2)
+            correctPass = hash[pos]
+
 
     try:
         endPoint = "http://" + str(ipAPI) + ":" + str(puertoAPI) + serverAPI + "modificarUsuario/" + currentUser[2]
-        body = {"name": currentUser[0], "oldPassword": passOld, "newPassword": password}
+        body = {"name": currentUser[0], "oldPassword": correctPassOld, "newPassword": correctPass}
         jsonBody = json.dumps(body)
 
         response = requests.put(
@@ -323,8 +342,11 @@ def borrarUsuarioAPI():
     if seleccion == "y":
         print(" Introduzca la contraseña actual: ")
         password = input()
+        hash = hashlib.sha512(password.encode("utf-8")).hexdigest()
+        pos = slice(0, len(hash) // 2)
+        correctPass = hash[pos]
 
-        if password == currentUser[1]:
+        if correctPass == currentUser[1]:
             print("las contraseñas coinciden")
             endPoint = "http://" + str(ipAPI) + ":" + str(puertoAPI) + serverAPI \
                        + "borrarUsuario/" + currentUser[2] + "/" + currentUser[0]
@@ -395,10 +417,13 @@ def crearUsuarioAPI():
     userName = input()
     print(" Constraseña: ")
     password = input()
+    hash = hashlib.sha512(password.encode("utf-8")).hexdigest()
+    pos = slice(0, len(hash) // 2)
+    correctPass = hash[pos]
 
     try:
         endPoint = "http://" + str(ipAPI) + ":" + str(puertoAPI) + serverAPI + "nuevoUsuario"
-        body = {"name": userName, "password": password}
+        body = {"name": userName, "password": correctPass}
         jsonBody = json.dumps(body)
 
         response = requests.post(
@@ -429,10 +454,13 @@ def logInAPI():
     userName = input()
     print(" Constraseña: ")
     password = input()
+    hash = hashlib.sha512(password.encode("utf-8")).hexdigest()
+    pos = slice(0, len(hash) // 2)
+    correctPass = hash[pos]
 
     try:
         endPoint = "http://" + str(ipAPI) + ":" + str(puertoAPI) + serverAPI + "login"
-        body = {"name": userName, "password": password}
+        body = {"name": userName, "password": correctPass}
         jsonBody = json.dumps(body)
 
         response = requests.post(

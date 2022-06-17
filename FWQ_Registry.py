@@ -133,6 +133,7 @@ def crearUsuario(msg):
         return ("Correcto, token:" + token)
 
     except Exception as e:
+        print(e)
         return ("Se ha producido un error al crear el usuario...")
 
 
