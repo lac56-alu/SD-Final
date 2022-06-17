@@ -1,0 +1,160 @@
+{
+  "openapi" : "3.0.0",
+  "info" : {
+    "title" : "API SD ENGINE",
+    "description" : "API SD ENGINE",
+    "contact" : {
+      "email" : "lac56@gcloud.ua.es"
+    },
+    "license" : {
+      "name" : "Apache 2.0",
+      "url" : "http://www.apache.org/licenses/LICENSE-2.0.html"
+    },
+    "version" : "1.0.0"
+  },
+  "servers" : [ {
+    "url" : "https://virtserver.swaggerhub.com/lac56-alu/SD-ENGINE/1.0.0",
+    "description" : "SwaggerHub API Auto Mocking"
+  } ],
+  "tags" : [ {
+    "name" : "engine",
+    "description" : "Para el apartado del engine"
+  } ],
+  "paths" : {
+    "/mostrarMapa" : {
+      "get" : {
+        "tags" : [ "engine" ],
+        "summary" : "engine",
+        "description" : "Mostrar el mapa\n",
+        "operationId" : "mostrarMapa",
+        "responses" : {
+          "202" : {
+            "description" : "respuesta",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/inline_response_202"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "No hay mapa"
+          }
+        }
+      }
+    },
+    "/mostrarCiudades" : {
+      "get" : {
+        "tags" : [ "engine" ],
+        "summary" : "engine",
+        "description" : "Mostrar las ciudades de los cuadrantes\n",
+        "operationId" : "mostrarCiudades",
+        "responses" : {
+          "202" : {
+            "description" : "respuesta",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/inline_response_202"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "No hay ciudades"
+          }
+        }
+      }
+    },
+    "/modificarCuadrante/{posicion}/{ciudad}" : {
+      "put" : {
+        "tags" : [ "engine" ],
+        "summary" : "engine",
+        "description" : "Modificar usuario\n",
+        "operationId" : "modificarUsuario",
+        "parameters" : [ {
+          "name" : "posicion",
+          "in" : "path",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "ciudad",
+          "in" : "path",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "202" : {
+            "description" : "Ciudad modificada correctamente"
+          },
+          "404" : {
+            "description" : "No se ha encontrado el cuadrante"
+          }
+        }
+      }
+    },
+    "/mostrarTemperaturas" : {
+      "get" : {
+        "tags" : [ "engine" ],
+        "summary" : "engine",
+        "description" : "Mostrar las temperaturas del mapa\n",
+        "operationId" : "mostrarTemperaturas",
+        "responses" : {
+          "202" : {
+            "description" : "respuesta",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/inline_response_202"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "No hay mapa"
+          }
+        }
+      }
+    }
+  },
+  "components" : {
+    "schemas" : {
+      "inline_response_202" : {
+        "type" : "object",
+        "properties" : {
+          "correcto" : {
+            "type" : "boolean"
+          },
+          "cadena" : {
+            "type" : "string"
+          }
+        },
+        "example" : {
+          "correcto" : true,
+          "cadena" : "cadena"
+        }
+      }
+    },
+    "responses" : {
+      "Respuesta" : {
+        "description" : "respuesta",
+        "content" : {
+          "application/json" : {
+            "schema" : {
+              "$ref" : "#/components/schemas/inline_response_202"
+            }
+          }
+        }
+      }
+    }
+  }
+}
