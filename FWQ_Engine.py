@@ -98,6 +98,7 @@ class Listener(object):
                 movimientoUsuario(message.body)
                 partes = message.body.split(',')
                 mapaToString(mapaGlobal, partes[1])
+                guardarMapaGeneral(mapaGlobal)
 
             print("Mensaje:", message.body)
             print("-----------------------------------------------------------------------------")
@@ -111,13 +112,100 @@ def enviarEngine(msg, top):
     except Exception as e:
         print("Error Enviar Mensaje:", e)
 
+def guardarMapaGeneral(mapa):
+    numAtraccion = 0
+
+    mapaString = ""
+    print(len(mapa))
+    tiempos = consultarTiempo()
+    partes = tiempos.split(',')
+
+    consultarCuadrante("0")
+    consultarCuadrante("1")
+    consultarCuadrante("2")
+    consultarCuadrante("3")
+
+    print(cuadratesActivos)
+
+    for i in range(0, len(mapa)):
+        if mapa[i] == 'X':
+            if i in posicionesCuadrante0:
+                if cuadratesActivos[0] == 'no':
+                    mapaString += "- "
+                else:
+                    mapaString += partes[numAtraccion] + " "
+                    numAtraccion += 1
+            elif i in posicionesCuadrante1:
+                if cuadratesActivos[1] == 'no':
+                    mapaString += "- "
+                else:
+                    mapaString += partes[numAtraccion] + " "
+                    numAtraccion += 1
+            elif i in posicionesCuadrante2:
+                if cuadratesActivos[2] == 'no':
+                    mapaString += "- "
+                else:
+                    mapaString += partes[numAtraccion] + " "
+                    numAtraccion += 1
+            elif i in posicionesCuadrante3:
+                if cuadratesActivos[3] == 'no':
+                    mapaString += "- "
+                else:
+                    mapaString += partes[numAtraccion] + " "
+                    numAtraccion += 1
+        else:
+            if comprobarUsuarioPosicion(i) == True:
+                mapaString += "X "
+            elif i in posicionesCuadrante0:
+                if cuadratesActivos[0] == 'no':
+                    mapaString += "- "
+                else:
+                    mapaString += mapaGlobal[i] + " "
+            elif i in posicionesCuadrante1:
+                if cuadratesActivos[1] == 'no':
+                    mapaString += "- "
+                else:
+                    mapaString += mapaGlobal[i] + " "
+            elif i in posicionesCuadrante2:
+                if cuadratesActivos[2] == 'no':
+                    mapaString += "- "
+                else:
+                    mapaString += mapaGlobal[i] + " "
+            elif i in posicionesCuadrante3:
+                if cuadratesActivos[3] == 'no':
+                    mapaString += "- "
+                else:
+                    mapaString += mapaGlobal[i] + " "
+
+        if i in saltoPosiciones:
+            mapaString += "\n"
+
+    print(mapaString)
+    if mapaString != "":
+        try:
+            cnx = mysql.connector.connect(
+                user='luis',
+                password='root',
+                host='127.0.0.1',
+                database='sd'
+            )
+
+            executeQuery = cnx.cursor()
+            sql = "INSERT INTO mapaparque(mapa, usuario) values ('" + mapaString + "', 'admin')"
+            executeQuery.execute(sql)
+
+            cnx.commit()
+            cnx.close()
+        except Exception as e:
+            return ("Se ha producido un error al guardar el mapa en la BD...")
+
+    return mapaString
 
 
 def mapaToString(mapa, nombre):
     numAtraccion = 0
 
     mapaString = ""
-    salto = 20
     print(len(mapa))
     tiempos = consultarTiempo()
     partes = tiempos.split(',')
@@ -424,6 +512,8 @@ puertoBroker = int(sys.argv[2])
 maxVisit = int(sys.argv[3])
 ipWatingTimeServer = sys.argv[4]
 puertoWatingTimeServer = int(sys.argv[5])
+
+guardarMapaGeneral(mapaGlobal)
 
 try:
     activeMQ()

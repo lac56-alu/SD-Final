@@ -43,14 +43,38 @@ namespace IO.Swagger.Controllers
         [ValidateModelState]
         [SwaggerOperation("ModificarUsuario")]
         public virtual IActionResult ModificarUsuario([FromRoute][Required]string posicion, [FromRoute][Required]string ciudad)
-        { 
-            //TODO: Uncomment the next line to return response 202 or use other options such as return this.NotFound(), return this.BadRequest(..), ...
-            // return StatusCode(202);
+        {
+            string stringConexion = "server=localhost;port=3306;user id=luis;password=root;database=sd;SslMode=none";
+            conn = new MySqlConnection(stringConexion);
+            conn.Open();
+            MySqlCommand cmd = new MySqlCommand();
+            cmd.Connection = conn;
+            InlineResponse202 resp = new InlineResponse202();
 
-            //TODO: Uncomment the next line to return response 404 or use other options such as return this.NotFound(), return this.BadRequest(..), ...
-            // return StatusCode(404);
+            try
+            {
+                conn = new MySqlConnection(stringConexion);
+                conn.Open();
+                MySqlCommand cmd2 = new MySqlCommand();
+                cmd2.Connection = conn;
+                string sql = "UPDATE sd.cuadrantes SET ciudad='" + ciudad + "' where id=" + posicion;
+                cmd2.CommandText = sql;
+                cmd2.ExecuteNonQuery();
 
-            throw new NotImplementedException();
+                resp.Correcto = true;
+                resp.Cadena = "Se ha modificado el cuadrante";
+                conn.Close();
+
+            }
+            catch (MySqlException e)
+            {
+                resp.Correcto = false;
+                resp.Cadena = "Error al realizar el modificar el cuadrante";
+                conn.Close();
+                return StatusCode(500, resp);
+            }
+
+            return StatusCode(202, resp);
         }
 
         /// <summary>
@@ -104,7 +128,7 @@ namespace IO.Swagger.Controllers
             catch (MySqlException e)
             {
                 resp.Correcto = false;
-                resp.Cadena = "Error al realizar el crear";
+                resp.Cadena = "Error al realizar el mostrarCiudades";
                 conn.Close();
                 return StatusCode(500, resp);
             }
@@ -116,27 +140,65 @@ namespace IO.Swagger.Controllers
         /// engine
         /// </summary>
         /// <remarks>Mostrar el mapa </remarks>
+        /// /// <param name="usuario"></param>
         /// <response code="202">respuesta</response>
         /// <response code="400">No hay mapa</response>
         [HttpGet]
-        [Route("/lac56-alu/SD-ENGINE/1.0.0/mostrarMapa")]
+        [Route("/lac56-alu/SD-ENGINE/1.0.0/mostrarMapa/{usuario}")]
         [ValidateModelState]
         [SwaggerOperation("MostrarMapa")]
         [SwaggerResponse(statusCode: 202, type: typeof(InlineResponse202), description: "respuesta")]
-        public virtual IActionResult MostrarMapa()
-        { 
-            //TODO: Uncomment the next line to return response 202 or use other options such as return this.NotFound(), return this.BadRequest(..), ...
-            // return StatusCode(202, default(InlineResponse202));
+        public virtual IActionResult MostrarMapa([FromRoute][Required] string usuario)
+        {
+            string mapa = "";
 
-            //TODO: Uncomment the next line to return response 400 or use other options such as return this.NotFound(), return this.BadRequest(..), ...
-            // return StatusCode(400);
-            string exampleJson = null;
-            exampleJson = "{\n  \"correcto\" : true,\n  \"cadena\" : \"cadena\"\n}";
-            
-                        var example = exampleJson != null
-                        ? JsonConvert.DeserializeObject<InlineResponse202>(exampleJson)
-                        : default(InlineResponse202);            //TODO: Change the data returned
-            return new ObjectResult(example);
+            string stringConexion = "server=localhost;port=3306;user id=luis;password=root;database=sd;SslMode=none";
+            InlineResponse202 resp = new InlineResponse202();
+            try
+            {
+                conn = new MySqlConnection(stringConexion);
+                conn.Open();
+                MySqlCommand cmd2 = new MySqlCommand();
+                cmd2.Connection = conn;
+                cmd2.CommandText = "select max(id), mapa from mapaparque where usuario = '" + usuario + "'";
+                cmd2.ExecuteNonQuery();
+
+                MySqlDataReader readerKey = cmd2.ExecuteReader();
+
+                while (readerKey.Read())
+                {
+                    try
+                    {
+                        mapa = readerKey.GetString(1);
+                    }
+                    catch (Exception exp)
+                    {
+                        Console.Write("Excepcion MostrarMapa: " + exp.Message.ToString());
+                    }
+                    
+                }
+
+                if (mapa == "")
+                {
+                    resp.Correcto = false;
+                    resp.Cadena = "No hay mapa";
+                    return StatusCode(404, resp);
+                }
+
+                resp.Correcto = true;
+                resp.Cadena = mapa;
+
+                conn.Close();
+            }
+            catch (MySqlException e)
+            {
+                resp.Correcto = false;
+                resp.Cadena = "Error al realizar el mostrarMapa";
+                conn.Close();
+                return StatusCode(500, resp);
+            }
+
+            return StatusCode(202, resp);
         }
 
         /// <summary>
@@ -151,19 +213,52 @@ namespace IO.Swagger.Controllers
         [SwaggerOperation("MostrarTemperaturas")]
         [SwaggerResponse(statusCode: 202, type: typeof(InlineResponse202), description: "respuesta")]
         public virtual IActionResult MostrarTemperaturas()
-        { 
-            //TODO: Uncomment the next line to return response 202 or use other options such as return this.NotFound(), return this.BadRequest(..), ...
-            // return StatusCode(202, default(InlineResponse202));
+        {
+            string[] ciudades = { };
+            List<string> list = new List<string>(ciudades.ToList());
 
-            //TODO: Uncomment the next line to return response 400 or use other options such as return this.NotFound(), return this.BadRequest(..), ...
-            // return StatusCode(400);
-            string exampleJson = null;
-            exampleJson = "{\n  \"correcto\" : true,\n  \"cadena\" : \"cadena\"\n}";
-            
-                        var example = exampleJson != null
-                        ? JsonConvert.DeserializeObject<InlineResponse202>(exampleJson)
-                        : default(InlineResponse202);            //TODO: Change the data returned
-            return new ObjectResult(example);
+            string stringConexion = "server=localhost;port=3306;user id=luis;password=root;database=sd;SslMode=none";
+            InlineResponse202 resp = new InlineResponse202();
+            try
+            {
+                conn = new MySqlConnection(stringConexion);
+                conn.Open();
+                MySqlCommand cmd2 = new MySqlCommand();
+                cmd2.Connection = conn;
+                cmd2.CommandText = "SELECT * FROM sd.cuadrantes";
+                cmd2.ExecuteNonQuery();
+
+                MySqlDataReader readerKey = cmd2.ExecuteReader();
+                bool comprobar = false;
+
+                while (readerKey.Read())
+                {
+                    string cad = readerKey.GetString(1) + ": " + readerKey.GetString(2) + "ºC";
+                    list.Add(cad);
+                }
+
+                if (list.Count == 0)
+                {
+                    resp.Correcto = false;
+                    resp.Cadena = "No hay ciudades";
+                    return StatusCode(404, resp);
+                }
+
+                var result = String.Join(", ", list.ToArray());
+                resp.Correcto = true;
+                resp.Cadena = result;
+
+                conn.Close();
+            }
+            catch (MySqlException e)
+            {
+                resp.Correcto = false;
+                resp.Cadena = "Error al realizar el mostrarTemperaturas";
+                conn.Close();
+                return StatusCode(500, resp);
+            }
+
+            return StatusCode(202, resp);
         }
     }
 }

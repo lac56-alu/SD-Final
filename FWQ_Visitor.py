@@ -7,6 +7,7 @@ import requests
 import stomp
 import time
 import hashlib
+import getpass
 
 # ---------------------- Variables Globales ----------------------
 HEADER = 100
@@ -92,8 +93,7 @@ def menuInicio():
 def logInSockets():
     print(" Nombre Usuario: ")
     userName = input()
-    print(" Constraseña: ")
-    password = input()
+    password = getpass.getpass(' Introduce la contraseña: ')
 
     hash = hashlib.sha512(password.encode("utf-8")).hexdigest()
     pos = slice(0, len(hash) // 2)
@@ -112,10 +112,8 @@ def crearUsuarioSockets():
     userName = input()
 
     while not comprobarPass:
-        print(" Constraseña: ")
-        password = input()
-        print(" Repita la contraseña: ")
-        password2 = input()
+        password = getpass.getpass(' Constraseña: ')
+        password2 = getpass.getpass('Repita la contraseña: ')
 
         if password == password2:
             comprobarPass = True
@@ -129,15 +127,15 @@ def crearUsuarioSockets():
 def modificarUsuario():
     comprobarPass = False
 
-    print(" Introduzca la contraseña actual: ")
-    passOld = input()
+    passOld = getpass.getpass(' Introduzca la contraseña actual: ')
+    hash = hashlib.sha512(passOld.encode("utf-8")).hexdigest()
+    pos = slice(0, len(hash) // 2)
+    correctPass = hash[pos]
 
-    if passOld == currentUser[1]:
+    if correctPass == currentUser[1]:
         while not comprobarPass:
-            print(" Constraseña nueva: ")
-            password = input()
-            print(" Repita la contraseña nueva: ")
-            password2 = input()
+            password = getpass.getpass(' Constraseña nueva: ')
+            password2 = getpass.getpass(' Repita la contraseña nueva: ')
 
             if password == password2:
                 comprobarPass = True
